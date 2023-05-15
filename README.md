@@ -14,7 +14,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/gerardocipriano/Cerberus-Dog-Breed-Classification-and-Body-Localization-PyTorch">
-    <img src="src/public/img/logo.png" alt="Logo" width="200">
+    <img src="res/secondLogo.png" alt="Logo" width="200">
   </a>
 
 <h3 align="center">Cerberus-Dog-Breed-Classification-and-Body-Localization-PyTorch!</h3>
