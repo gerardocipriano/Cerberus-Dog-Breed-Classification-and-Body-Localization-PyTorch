@@ -1,12 +1,14 @@
 from torch.utils.data import Dataset
+from PIL import Image
 import os
 import xml.etree.ElementTree as ET
-from PIL import Image
+import torch
 
 class StanfordDogsDataset(Dataset):
-    def __init__(self, root_dir, transform=None):
+    def __init__(self, root_dir, transform=None, max_objects=10):
         self.root_dir = root_dir
         self.transform = transform
+        self.max_objects = max_objects
         self.classes = sorted(os.listdir(os.path.join(root_dir, 'Images')))
         self.class_to_idx = {cls: idx for idx, cls in enumerate(self.classes)}
         self.samples = []
@@ -35,7 +37,19 @@ class StanfordDogsDataset(Dataset):
             ymin = int(bbox.find('ymin').text)
             xmax = int(bbox.find('xmax').text)
             ymax = int(bbox.find('ymax').text)
-            bboxes.append((xmin, ymin, xmax, ymax))
+            x_center = (xmin + xmax) / 2
+            y_center = (ymin + ymax) / 2
+            width = xmax - xmin
+            height = ymax - ymin
+            bboxes.append([label, x_center, y_center, width, height])
+        
+        # Pad the list of bounding boxes with zeros if necessary
+        while len(bboxes) < self.max_objects:
+            bboxes.append([0] * 5)
+        
+        bboxes = torch.tensor(bboxes)
+        
         if self.transform:
             img = self.transform(img)
-        return img, bboxes, label
+        
+        return img, label
