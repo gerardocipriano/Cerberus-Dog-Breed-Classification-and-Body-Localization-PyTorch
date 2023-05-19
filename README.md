@@ -64,7 +64,7 @@
   </a>
   <p align="center">
 </div>
-Cerberus is a PyTorch-based project for classifying dog breeds and localizing specific body parts within images. Our model is capable of recognizing and classifying 3 dog breeds (Toy Poodle, Retriever, Beagle, Siberian Husky) and localizing 3 specific body parts (eyes, nose, tail) within images. This repository contains the code and resources for training and evaluating the model, as well as a user interface for interacting with the algorithm.
+Cerberus is a PyTorch-based project for classifying dog breeds and localizing specific body parts within images. Our model is capable of recognizing and classifying 3 dog breeds (Toy Poodle, Beagle, Siberian Husky) and localizing 3 specific body parts (eyes, nose, tail) within images. This repository contains the code and resources for training and evaluating the model, as well as a user interface for interacting with the algorithm.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -92,7 +92,7 @@ Cerberus is a PyTorch-based project for classifying dog breeds and localizing sp
 
 Mandatory features:
 
-- [ ] Recognizing and classifying 3 dog breeds (Toy Poodle, Retriever, Beagle, Siberian Husky)
+- [x] Recognizing and classifying 3 dog breeds (Toy Poodle, Beagle, Siberian Husky)
 - [ ] Localizing 3 specific body parts (eyes, nose, tail)
 
 Optional features:
