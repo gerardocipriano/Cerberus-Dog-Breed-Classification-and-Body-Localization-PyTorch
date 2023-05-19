@@ -7,6 +7,7 @@ from torchvision import transforms
 from torch.utils.data import DataLoader
 from torchvision import models
 from dataloader import DogBreedDataset
+from datatransform import DataTransform
 
 def imshow(imgs, labels):
     fig = plt.figure(figsize=(10, 10))
@@ -26,15 +27,13 @@ class NetRunner:
         self.model.to(self.device)
         self.criterion = nn.CrossEntropyLoss()
         self.optimizer = torch.optim.SGD(self.model.parameters(), lr=0.001, momentum=0.9)
-        transform = transforms.Compose([
-            transforms.Resize(256),
-            transforms.CenterCrop(224),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-        ])
-        dataset = DogBreedDataset(root_dir=root_dir, transform=transform)
+        
+        data_transform = DataTransform(augment=train)
+        dataset = DogBreedDataset(root_dir=root_dir, transform=data_transform)
         self.dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
+        
         self.breeds = ['n02088364-beagle', 'n02110185-Siberian_husky', 'n02113624-toy_poodle']
+        
         if train:
             self.train(preview)
 
@@ -54,14 +53,13 @@ class NetRunner:
                 if i % 10 == 9:
                     print(f'Epoch: {epoch + 1}, Batch: {i + 1}, Loss: {running_loss / 10}')
                     running_loss = 0.0
-                    if preview:
-                        predictions = [self.breeds[output.argmax()] for output in outputs]
-                        imshow(inputs.cpu(), predictions)
-                        preview = False
+            if preview:
+                predictions = [self.breeds[output.argmax()] for output in outputs]
+                imshow(inputs.cpu(), predictions)
+                preview = False
         print('Finished Training')
         # Save the trained model weights
         torch.save(self.model.state_dict(), 'model.pth')
-
 
     def evaluate(self, dataloader):
         correct = 0
@@ -79,7 +77,7 @@ class NetRunner:
                 correct += (predicted == labels_idx).sum().item()
                 all_labels.extend(labels)
                 all_predictions.extend([self.breeds[prediction] for prediction in predicted])
-        accuracy = 100 * correct / total
-        print(f'Accuracy: {accuracy}%')
-        cm = confusion_matrix(all_labels, all_predictions, labels=self.breeds)
-        print(f'Confusion Matrix:\n{cm}')
+            accuracy = 100 * correct / total
+            print(f'Accuracy: {accuracy}%')
+            cm = confusion_matrix(all_labels, all_predictions, labels=self.breeds)
+            print(f'Confusion Matrix:\n{cm}')
