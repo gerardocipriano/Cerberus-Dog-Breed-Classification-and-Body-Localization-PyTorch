@@ -13,7 +13,7 @@ def imshow(imgs, labels):
     for i in range(imgs.size(0)):
         img = imgs[i] / 2 + 0.5
         npimg = img.numpy()
-        ax = fig.add_subplot(2, 2, i + 1)
+        ax = fig.add_subplot(8, 4, i + 1)
         ax.imshow(np.transpose(npimg, (1, 2, 0)))
         ax.set_title(labels[i])
     plt.show()
@@ -39,7 +39,7 @@ class NetRunner:
             self.train(preview)
 
     def train(self, preview):
-        for epoch in range(5):
+        for epoch in range(10):
             running_loss = 0.0
             for i, data in enumerate(self.dataloader):
                 inputs, labels = data
@@ -59,6 +59,9 @@ class NetRunner:
                         imshow(inputs.cpu(), predictions)
                         preview = False
         print('Finished Training')
+        # Save the trained model weights
+        torch.save(self.model.state_dict(), 'model.pth')
+
 
     def evaluate(self, dataloader):
         correct = 0
