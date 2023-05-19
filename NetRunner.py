@@ -1,3 +1,4 @@
+from sklearn.metrics import confusion_matrix
 import torch
 import matplotlib.pyplot as plt
 import numpy as np
@@ -58,3 +59,24 @@ class NetRunner:
                         imshow(inputs.cpu(), predictions)
                         preview = False
         print('Finished Training')
+
+    def evaluate(self, dataloader):
+        correct = 0
+        total = 0
+        all_labels = []
+        all_predictions = []
+        with torch.no_grad():
+            for data in dataloader:
+                inputs, labels = data
+                inputs = inputs.to(self.device)
+                labels_idx = torch.tensor([self.breeds.index(label) for label in labels]).to(self.device)
+                outputs = self.model(inputs)
+                _, predicted = torch.max(outputs.data, 1)
+                total += len(labels)
+                correct += (predicted == labels_idx).sum().item()
+                all_labels.extend(labels)
+                all_predictions.extend([self.breeds[prediction] for prediction in predicted])
+        accuracy = 100 * correct / total
+        print(f'Accuracy: {accuracy}%')
+        cm = confusion_matrix(all_labels, all_predictions, labels=self.breeds)
+        print(f'Confusion Matrix:\n{cm}')
