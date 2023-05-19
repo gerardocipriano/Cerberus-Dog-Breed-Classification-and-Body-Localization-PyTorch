@@ -2,7 +2,7 @@
 from torchvision import transforms
 from torch.utils.data import DataLoader
 
-from StanfordDogsDataset import StanfordDogsDataset
+from dataloader import StanfordDogsDataset
 
 data_transforms = transforms.Compose([
     transforms.Resize(256),

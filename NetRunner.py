@@ -1,135 +1,60 @@
 import torch
-import torch.nn as nn
+import matplotlib.pyplot as plt
+import numpy as np
+from torch import nn
+from torchvision import transforms
+from torch.utils.data import DataLoader
 from torchvision import models
-from load_stanford_dogs import test_loader, train_loader, val_loader
+from dataloader import DogBreedDataset
+
+def imshow(imgs, labels):
+    fig = plt.figure(figsize=(10, 10))
+    for i in range(imgs.size(0)):
+        img = imgs[i] / 2 + 0.5
+        npimg = img.numpy()
+        ax = fig.add_subplot(2, 2, i + 1)
+        ax.imshow(np.transpose(npimg, (1, 2, 0)))
+        ax.set_title(labels[i])
+    plt.show()
 
 class NetRunner:
-    def __init__(self, train_loader, val_loader, test_loader, num_classes=3):
-        self.train_loader = train_loader
-        self.val_loader = val_loader
-        self.test_loader = test_loader
-        self.num_classes = num_classes
-
-        # Load a pre-trained model
-        self.model = models.resnet18(pretrained=True)
-
-        # Replace the last layer with a new layer for our specific task
-        num_ftrs = self.model.fc.in_features
-        self.model.fc = nn.Linear(num_ftrs, num_classes)
-
-        # Move the model to the GPU if available
-        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    def __init__(self, root_dir, train=True, preview=True):
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.model = models.alexnet(weights='DEFAULT')
+        self.model.classifier[6] = nn.Linear(4096, 3)
         self.model.to(self.device)
-
-        # Set the loss function and optimizer
         self.criterion = nn.CrossEntropyLoss()
-        self.optimizer = torch.optim.Adam(self.model.parameters())
+        self.optimizer = torch.optim.SGD(self.model.parameters(), lr=0.001, momentum=0.9)
+        transform = transforms.Compose([
+            transforms.Resize(256),
+            transforms.CenterCrop(224),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+        ])
+        dataset = DogBreedDataset(root_dir=root_dir, transform=transform)
+        self.dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
+        self.breeds = ['n02088364-beagle', 'n02110185-Siberian_husky', 'n02113624-toy_poodle']
+        if train:
+            self.train(preview)
 
-    def train(self, num_epochs=10):
-        for epoch in range(num_epochs):
+    def train(self, preview):
+        for epoch in range(5):
             running_loss = 0.0
-            for i, data in enumerate(self.train_loader):
+            for i, data in enumerate(self.dataloader):
                 inputs, labels = data
-                inputs, labels = inputs.to(self.device), labels.to(self.device)
-
-                # Zero the parameter gradients
+                inputs = inputs.to(self.device)
+                labels_idx = torch.tensor([self.breeds.index(label) for label in labels]).to(self.device)
                 self.optimizer.zero_grad()
-
-                # Forward pass
                 outputs = self.model(inputs)
-                loss = self.criterion(outputs, labels)
-
-                # Backward pass and optimization step
+                loss = self.criterion(outputs, labels_idx)
                 loss.backward()
                 self.optimizer.step()
-
                 running_loss += loss.item()
-            print(f"Epoch: {epoch+1}/{num_epochs} Loss: {running_loss/len(self.train_loader)}")
-
-    def evaluate(self):
-        correct = 0
-        total = 0
-        with torch.no_grad():
-            for data in self.test_loader:
-                images, labels = data
-                images, labels = images.to(self.device), labels.to(self.device)
-                outputs = self.model(images)
-                _, predicted = torch.max(outputs.data, 1)
-                total += labels.size(0)
-                correct += (predicted == labels).sum().item()
-        print(f"Accuracy: {100 * correct / total}%")
-
-    def predict(self, images):
-        # Move the images to the GPU if available
-        images = images.to(self.device)
-
-        # Forward pass
-        outputs = self.model(images)
-        _, predicted = torch.max(outputs.data, 1)
-        
-        return predicted
-
-net_runner = NetRunner(train_loader, val_loader, test_loader)
-net_runner.train()
-net_runner.evaluate()
-
-# Get a batch of images from the test loader
-images, labels = next(iter(test_loader))
-
-# Make predictions using the trained model
-predicted = net_runner.predict(images)
-
-# Print the true and predicted labels
-print(f"True labels: {labels}")
-print(f"Predicted labels: {predicted}")
-
-from sklearn.metrics import confusion_matrix
-import numpy as np
-
-# Get all the true and predicted labels for the test set
-true_labels = []
-predicted_labels = []
-for data in test_loader:
-    images, labels = data
-    predicted = net_runner.predict(images)
-    true_labels.extend(labels.tolist())
-    predicted_labels.extend(predicted.tolist())
-
-# Calculate the confusion matrix
-cm = confusion_matrix(true_labels, predicted_labels)
-
-# Print the confusion matrix
-print(cm)
-
-import matplotlib.pyplot as plt
-
-import numpy as np
-
-# Get all the true and predicted labels for the test set
-true_labels = []
-predicted_labels = []
-misclassified_images = []
-for data in test_loader:
-    images, labels = data
-    predicted = net_runner.predict(images)
-    true_labels.extend(labels.tolist())
-    predicted_labels.extend(predicted.tolist())
-    
-    # Find the misclassified images
-    mask = predicted != labels
-    misclassified_images.extend(images[mask].tolist())
-
-# Plot the misclassified images
-num_images = len(misclassified_images)
-fig, axs = plt.subplots(1, num_images, figsize=(15, 3))
-for i in range(num_images):
-    # Convert the image to a NumPy array
-    image_array = np.array(misclassified_images[i])
-    
-    # Transpose the array
-    transposed_image = image_array.transpose((1, 2, 0))
-    
-    # Display the transposed image
-    axs[i].imshow(transposed_image)
-    axs[i].axis('off')  
-plt.show()
+                if i % 10 == 9:
+                    print(f'Epoch: {epoch + 1}, Batch: {i + 1}, Loss: {running_loss / 10}')
+                    running_loss = 0.0
+                    if preview:
+                        predictions = [self.breeds[output.argmax()] for output in outputs]
+                        imshow(inputs.cpu(), predictions)
+                        preview = False
+        print('Finished Training')
