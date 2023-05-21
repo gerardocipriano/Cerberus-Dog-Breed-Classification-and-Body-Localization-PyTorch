@@ -28,7 +28,7 @@ class DogBreedDataset(Dataset):
         return image, breed
 
 if __name__ == '__main__':
-    root_dir = r'H:\Code\Cerberus-Dog-Breed-Classification-and-Body-Localization-PyTorch\StanfordDogs'
+    root_dir = r'C:\Users\massi\Desktop\Cerberus-Dog-Breed-Classification-and-Body-Localization-PyTorch\StanfordDogs'
     transform = transforms.Compose([
         transforms.Resize(256),
         transforms.CenterCrop(224),
@@ -38,3 +38,4 @@ if __name__ == '__main__':
     dataset = DogBreedDataset(root_dir=root_dir, transform=transform)
     print(len(dataset))
     print(dataset[0])
+    #H:\Code\Cerberus-Dog-Breed-Classification-and-Body-Localization-PyTorch\StanfordDogs

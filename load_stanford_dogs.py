@@ -2,7 +2,7 @@
 from torchvision import transforms
 from torch.utils.data import DataLoader
 
-from dataloader import StanfordDogsDataset
+from dataloader import DogBreedDataset
 
 data_transforms = transforms.Compose([
     transforms.Resize(256),
@@ -11,9 +11,9 @@ data_transforms = transforms.Compose([
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ])
 
-dataset = StanfordDogsDataset(root_dir='StanfordDogs', transform=data_transforms)
+dataset = DogBreedDataset(root_dir='StanfordDogs', transform=data_transforms)
 dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
-print(f"Loaded {len(dataset)} samples from {len(dataset.classes)} classes.")
+print(f"Loaded {len(dataset)} samples from {len(dataset.breeds)} classes.")
 
 # Split the dataset into training, validation and test sets
 from torch.utils.data import random_split
