@@ -14,7 +14,7 @@ class DogBreedDataset(Dataset):
             for file in os.listdir(breed_dir):
                 if file.endswith('.jpg'):
                     img_path = os.path.join(breed_dir, file)
-                    annotation_path = os.path.join(self.root_dir, 'AnnotationYolo', breed, file.replace('.jpg', '.xml'))
+                    annotation_path = os.path.join(self.root_dir, 'Annotation', breed, file.replace('.jpg', '.xml'))
                     self.data.append((img_path, annotation_path, breed))
 
     def __len__(self):
@@ -26,16 +26,3 @@ class DogBreedDataset(Dataset):
         if self.transform:
             image = self.transform(image)
         return image, breed
-
-if __name__ == '__main__':
-    root_dir = r'C:\Users\massi\Desktop\Cerberus-Dog-Breed-Classification-and-Body-Localization-PyTorch\StanfordDogs'
-    transform = transforms.Compose([
-        transforms.Resize(256),
-        transforms.CenterCrop(224),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-    ])
-    dataset = DogBreedDataset(root_dir=root_dir, transform=transform)
-    print(len(dataset))
-    print(dataset[0])
-    #H:\Code\Cerberus-Dog-Breed-Classification-and-Body-Localization-PyTorch\StanfordDogs
