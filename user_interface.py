@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import filedialog
+from tkinter import simpledialog
 
 class UserInterface:
     def __init__(self):
@@ -29,3 +30,6 @@ class UserInterface:
 
     def ask_image_path(self):
         return filedialog.askopenfilename(filetypes=[('JPG files', '*.jpg')])
+
+    def ask_early_stopping_patience(self):
+        return simpledialog.askinteger('Early Stopping', 'Enter the early stopping patience:', parent=self.root, minvalue=1)

@@ -3,7 +3,6 @@ import torch
 import matplotlib.pyplot as plt
 import numpy as np
 from torch import nn
-from torchvision import transforms
 from torch.utils.data import DataLoader
 from torchvision import models
 from dataloader import DogBreedDataset
@@ -27,17 +26,17 @@ class NetRunner:
         self.model.to(self.device)
         self.criterion = nn.CrossEntropyLoss()
         self.optimizer = torch.optim.SGD(self.model.parameters(), lr=0.001, momentum=0.9)
-        
+
         data_transform = DataTransform(augment=train)
         dataset = DogBreedDataset(root_dir=root_dir, transform=data_transform)
         self.dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
-        
-        self.breeds = ['n02088364-beagle', 'n02110185-Siberian_husky', 'n02113624-toy_poodle']
-        
-        if train:
-            self.train(preview)
 
-    def train(self, preview):
+        self.breeds = ['n02088364-beagle', 'n02110185-Siberian_husky', 'n02113624-toy_poodle']
+
+
+    def train(self, preview, validation_dataloader, early_stopping_patience=3):
+        best_val_loss = float('inf')
+        patience_counter = 0
         for epoch in range(10):
             running_loss = 0.0
             for i, data in enumerate(self.dataloader):
@@ -57,6 +56,29 @@ class NetRunner:
                 predictions = [self.breeds[output.argmax()] for output in outputs]
                 imshow(inputs.cpu(), predictions)
                 preview = False
+
+            # Calculate validation loss
+            val_loss = 0.0
+            with torch.no_grad():
+                for data in validation_dataloader:
+                    inputs, labels = data
+                    inputs = inputs.to(self.device)
+                    labels_idx = torch.tensor([self.breeds.index(label) for label in labels]).to(self.device)
+                    outputs = self.model(inputs)
+                    loss = self.criterion(outputs, labels_idx)
+                    val_loss += loss.item()
+            val_loss /= len(validation_dataloader)
+
+            # Check for early stopping
+            if val_loss < best_val_loss:
+                best_val_loss = val_loss
+                patience_counter = 0
+            else:
+                patience_counter += 1
+                if patience_counter >= early_stopping_patience:
+                    print(f'Early stopping at epoch {epoch + 1}')
+                    break
+
         print('Finished Training')
         # Save the trained model weights
         torch.save(self.model.state_dict(), 'model.pth')

@@ -9,8 +9,9 @@ class DataModelManager:
     def __init__(self, root_dir):
         self.root_dir = root_dir
 
-    def train_model(self, preview):
+    def train_model(self, preview, validation_dataloader, early_stopping_patience=3):
         netrunner = NetRunner(root_dir=self.root_dir, train=True, preview=preview)
+        netrunner.train(preview, validation_dataloader, early_stopping_patience)
         torch.save(netrunner.model, 'model.pth')
 
     def evaluate_model(self):
