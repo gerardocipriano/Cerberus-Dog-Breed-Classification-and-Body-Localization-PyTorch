@@ -3,7 +3,7 @@ from data_model_manager import DataModelManager
 from dataloader import DogBreedDataset
 from datatransform import DataTransform
 from torch.utils.data import DataLoader
-ò
+
 def main():
     root_dir = r'StanfordDogs'
     ui = UserInterface()
