@@ -1,7 +1,7 @@
 import torch
 from dataloader import DogBreedDataset
 from datatransform import DataTransform
-from netrunner import NetRunner
+from net_runner import NetRunner
 from prediction import Prediction
 from torch.utils.data import DataLoader
 
