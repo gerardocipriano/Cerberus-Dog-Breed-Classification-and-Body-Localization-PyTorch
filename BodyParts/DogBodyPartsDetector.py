@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
 
-
 class DogBodyPartsDetector(nn.Module):
     def __init__(self, num_classes):
         super(DogBodyPartsDetector, self).__init__()
@@ -19,7 +18,7 @@ class DogBodyPartsDetector(nn.Module):
         )
 
         self.classifier = nn.Sequential(
-            nn.Linear(64 * 7 * 7, 256),
+            nn.Linear(64 * 28 * 28, 256),  # Updated input size
             nn.ReLU(inplace=True),
             nn.Linear(256, num_classes),
         )
@@ -29,6 +28,7 @@ class DogBodyPartsDetector(nn.Module):
         x = x.view(x.size(0), -1)
         x = self.classifier(x)
         return x
+
 
 
 

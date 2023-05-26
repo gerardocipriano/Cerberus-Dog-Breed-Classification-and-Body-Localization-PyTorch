@@ -162,3 +162,4 @@ cython_debug/
 #.idea/
 
 model.pth
+dog_body_parts_detector_pth
