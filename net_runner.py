@@ -99,7 +99,7 @@ class NetRunner:
                 correct += (predicted == labels_idx).sum().item()
                 all_labels.extend(labels)
                 all_predictions.extend([self.breeds[prediction] for prediction in predicted])
-            accuracy = 100 * correct / total
+            accuracy = 100 * correct / len(dataloader.dataset)
             print(f'Accuracy: {accuracy}%')
             cm = confusion_matrix(all_labels, all_predictions, labels=self.breeds)
             print(f'Confusion Matrix:\n{cm}')

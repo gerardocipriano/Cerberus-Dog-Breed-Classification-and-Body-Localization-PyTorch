@@ -12,7 +12,7 @@ class DataModelManager:
     def train_model(self, preview, validation_dataloader, early_stopping_patience=3):
         netrunner = NetRunner(root_dir=self.root_dir, train=True, preview=preview)
         netrunner.train(preview, validation_dataloader, early_stopping_patience)
-        torch.save(netrunner.model, 'model.pth')
+        torch.save(netrunner.model.state_dict(), 'model.pth')
 
     def evaluate_model(self):
         data_transform = DataTransform(augment=False)
