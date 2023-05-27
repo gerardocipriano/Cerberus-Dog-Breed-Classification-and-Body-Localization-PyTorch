@@ -50,37 +50,8 @@ if __name__ == "__main__":
 
     # Train the model
     net_runner.train()
-
+    validation_loss = net_runner.evaluate()
+    print("Validation Loss:", validation_loss)
+    
     # Save the trained model
     torch.save(model.state_dict(), 'dog_body_parts_detector.pth')
-
-
-    """
-    custom_trainset = CustomDataset(root='../generatore_forme/dst/training', transform=transform)
-    custom_testset = CustomDataset(root='../generatore_forme/dst/test', transform=transform)
-    pt_trainset = torchvision.datasets.ImageFolder(root='../generatore_forme/dst/training', transform=transform)
-    pt_testset = torchvision.datasets.ImageFolder(root='../generatore_forme/dst/test', transform=transform)
-
-    trainset = custom_trainset if custom else pt_trainset
-    testset = custom_testset if custom else pt_testset
-    classes = custom_trainset.classes
-
-    # Create a DataLoader
-    dataloader = DataLoader(dataset, batch_size=32, shuffle=True, num_workers=4)
-
-    trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size, shuffle=True)
-    testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size, shuffle=True)
-
-    runner = NetRunner(classes, batch_size)
-
-    if train:
-        runner.train(trainloader, preview)
-    else:
-        runner.test(testloader, True, preview)
-
-    for images, boxes in dataloader:
-        # Perform your model training or evaluation here
-        # images: tensor of shape (batch_size, channels, height, width)
-        # boxes: tensor of shape (batch_size, num_boxes, 5), where 5 represents (xmin, ymin, xmax, ymax, class_id)
-        pass
-    """

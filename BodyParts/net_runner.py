@@ -57,8 +57,21 @@ class NetRunner:
                 annotations = annotations.to(self.device)
 
                 outputs = self.model(images)
-                loss = self.loss_fn(outputs, annotations)
+                batch_size, num_body_parts, _ = annotations.size()
+
+                # Reshape annotations to match the shape of outputs
+                annotations = annotations.view(batch_size, -1)
+
+                # Calculate loss separately for each body part
+                losses = []
+                for i in range(num_body_parts):
+                    loss = self.loss_fn(outputs[:, i], annotations[:, i])
+                    losses.append(loss)
+
+                # Average the losses
+                loss = torch.mean(torch.stack(losses))
 
                 val_loss += loss.item()
 
         return val_loss / len(self.val_loader)
+
