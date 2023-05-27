@@ -13,11 +13,12 @@ def main():
     if train:
         preview = ui.ask_preview()
         early_stopping_patience = ui.ask_early_stopping_patience()
+        model_path = ui.ask_model_path()
         data_transform = DataTransform(augment=False)
         validation_dataset = DogBreedDataset(root_dir=root_dir, transform=data_transform)
         validation_dataloader = DataLoader(validation_dataset, batch_size=32)
         ui.show_loading()
-        dm.train_model(preview, validation_dataloader, early_stopping_patience)
+        dm.train_model(preview, validation_dataloader, early_stopping_patience, model_path)
         ui.hide_loading()
 
     evaluate = ui.ask_evaluate()

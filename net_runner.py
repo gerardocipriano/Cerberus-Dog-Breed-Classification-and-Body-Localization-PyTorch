@@ -18,20 +18,26 @@ def imshow(imgs, labels):
         ax.set_title(labels[i])
     plt.show()
 
+from torch.optim.lr_scheduler import ReduceLROnPlateau
+
 class NetRunner:
-    def __init__(self, root_dir, train=True, preview=True):
+    def __init__(self, root_dir, train=True, preview=True, model_path=None):
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.model = models.alexnet(weights='DEFAULT')
+        self.model = models.alexnet(weights='DEFAULT' if model_path is None else None)
         self.model.classifier[6] = nn.Linear(4096, 3)
+        if model_path is not None:
+            self.model.load_state_dict(torch.load(model_path))
         self.model.to(self.device)
         self.criterion = nn.CrossEntropyLoss()
-        self.optimizer = torch.optim.SGD(self.model.parameters(), lr=0.001, momentum=0.9)
+        self.optimizer = torch.optim.SGD(self.model.parameters(), lr=1E-5, momentum=0.9)
+        self.scheduler = ReduceLROnPlateau(self.optimizer, mode='min', factor=0.1, patience=10)
 
         data_transform = DataTransform(augment=train)
         dataset = DogBreedDataset(root_dir=root_dir, transform=data_transform)
         self.dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
 
         self.breeds = ['n02088364-beagle', 'n02110185-Siberian_husky', 'n02113624-toy_poodle']
+
 
 
     def train(self, preview, validation_dataloader, early_stopping_patience=3):
@@ -69,6 +75,9 @@ class NetRunner:
                     val_loss += loss.item()
             val_loss /= len(validation_dataloader)
 
+            # Update learning rate
+            self.scheduler.step(val_loss)
+
             # Check for early stopping
             if val_loss < best_val_loss:
                 best_val_loss = val_loss
@@ -80,8 +89,8 @@ class NetRunner:
                     break
 
         print('Finished Training')
-        # Save the trained model weights
-        torch.save(self.model.state_dict(), 'model.pth')
+
+
 
     def evaluate(self, dataloader):
         correct = 0

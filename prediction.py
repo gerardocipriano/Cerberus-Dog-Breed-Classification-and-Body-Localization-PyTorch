@@ -7,7 +7,7 @@ from torchvision import models
 class Prediction:
     def __init__(self, model_path):
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.model = models.alexnet(pretrained=None)
+        self.model = models.alexnet(weights=None)
         self.model.classifier[6] = nn.Linear(4096, 3)
         self.model.load_state_dict(torch.load(model_path))
         self.model.to(self.device)

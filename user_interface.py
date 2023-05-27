@@ -33,3 +33,6 @@ class UserInterface:
 
     def ask_early_stopping_patience(self):
         return simpledialog.askinteger('Early Stopping', 'Enter the early stopping patience:', parent=self.root, minvalue=1)
+
+    def ask_model_path(self):
+        return filedialog.askopenfilename(filetypes=[('Model files', '*.pth')])
