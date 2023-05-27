@@ -24,16 +24,22 @@ if __name__ == "__main__":
     ])
 
     # Define dataset
-    image_dir = 'BodyParts/images'
-    annotation_dir = 'BodyParts/annotations'
-    dataset = DogBodyPartsDataset(image_dir, annotation_dir, transform=transform)
+    train_image_dir = 'train/images'
+    train_annotation_dir = 'train/labels'
+    train_dataset = DogBodyPartsDataset(train_image_dir, train_annotation_dir, transform=transform)
+
+    test_image_dir = 'test/images'
+    test_annotation_dir = 'test/labels'
+    test_dataset = DogBodyPartsDataset(test_image_dir, test_annotation_dir, transform=transform)
+
+    valid_image_dir = 'valid/images'
+    valid_annotation_dir = 'valid/labels'
+    valid_dataset = DogBodyPartsDataset(valid_image_dir, valid_annotation_dir, transform=transform)
 
     # Create data loaders
-    train_size = int(0.8 * len(dataset))
-    val_size = len(dataset) - train_size
-    train_dataset, val_dataset = torch.utils.data.random_split(dataset, [train_size, val_size])
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
+    valid_loader = DataLoader(valid_dataset, batch_size=batch_size, shuffle=False)
 
     # Create model
     num_classes = 3  # Number of body parts to detect
@@ -46,7 +52,7 @@ if __name__ == "__main__":
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
     # Create an instance of NetRunner
-    net_runner = NetRunner(model, train_loader, val_loader, criterion, optimizer, device, num_epochs)
+    net_runner = NetRunner(model, train_loader, valid_loader, criterion, optimizer, device, num_epochs)
 
     # Train the model
     net_runner.train()
