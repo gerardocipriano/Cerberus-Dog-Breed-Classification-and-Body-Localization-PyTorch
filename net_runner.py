@@ -3,10 +3,7 @@ import torch
 import matplotlib.pyplot as plt
 import numpy as np
 from torch import nn
-from torch.utils.data import DataLoader
 from torchvision import models
-from dataloader import DogBreedDataset
-from datatransform import DataTransform
 
 def imshow(imgs, labels):
     fig = plt.figure(figsize=(10, 10))
@@ -26,26 +23,21 @@ class NetRunner:
         self.model = models.alexnet(weights='DEFAULT' if model_path is None else None)
         self.model.classifier[6] = nn.Linear(4096, 3)
         if model_path is not None:
+            print(f'Loading model from {model_path}')
             self.model.load_state_dict(torch.load(model_path))
         self.model.to(self.device)
         self.criterion = nn.CrossEntropyLoss()
         self.optimizer = torch.optim.SGD(self.model.parameters(), lr=1E-5, momentum=0.9)
         self.scheduler = ReduceLROnPlateau(self.optimizer, mode='min', factor=0.1, patience=10)
 
-        data_transform = DataTransform(augment=train)
-        dataset = DogBreedDataset(root_dir=root_dir, transform=data_transform)
-        self.dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
-
         self.breeds = ['n02088364-beagle', 'n02110185-Siberian_husky', 'n02113624-toy_poodle']
 
-
-
-    def train(self, preview, validation_dataloader, early_stopping_patience=3):
+    def train(self, training_dataloader, validation_dataloader, preview=False, early_stopping_patience=3):
         best_val_loss = float('inf')
         patience_counter = 0
         for epoch in range(10):
             running_loss = 0.0
-            for i, data in enumerate(self.dataloader):
+            for i, data in enumerate(training_dataloader):
                 inputs, labels = data
                 inputs = inputs.to(self.device)
                 labels_idx = torch.tensor([self.breeds.index(label) for label in labels]).to(self.device)
@@ -58,10 +50,10 @@ class NetRunner:
                 if i % 10 == 9:
                     print(f'Epoch: {epoch + 1}, Batch: {i + 1}, Loss: {running_loss / 10}')
                     running_loss = 0.0
-            if preview:
-                predictions = [self.breeds[output.argmax()] for output in outputs]
-                imshow(inputs.cpu(), predictions)
-                preview = False
+                if preview:
+                    predictions = [self.breeds[output.argmax()] for output in outputs]
+                    imshow(inputs.cpu(), predictions)
+                    preview = False
 
             # Calculate validation loss
             val_loss = 0.0
@@ -73,7 +65,7 @@ class NetRunner:
                     outputs = self.model(inputs)
                     loss = self.criterion(outputs, labels_idx)
                     val_loss += loss.item()
-            val_loss /= len(validation_dataloader)
+                val_loss /= len(validation_dataloader)
 
             # Update learning rate
             self.scheduler.step(val_loss)
@@ -89,8 +81,6 @@ class NetRunner:
                     break
 
         print('Finished Training')
-
-
 
     def evaluate(self, dataloader):
         correct = 0
