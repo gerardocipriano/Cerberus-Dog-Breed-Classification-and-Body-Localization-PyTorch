@@ -1,37 +1,44 @@
-import torch
-from dataloader import DogBreedDataset
-from datatransform import DataTransform
+from dataloader import DogDataset
 from net_runner import NetRunner
-from prediction import Prediction
+from prediction import Predictor
 from torch.utils.data import DataLoader
 
+from torchvision.transforms import Compose, Resize, CenterCrop, ToTensor, Normalize
+
 class DataModelManager:
-    def __init__(self, root_dir):
-        self.root_dir = root_dir
+    def __init__(self, config):
+        self.config = config
+        data_transform = Compose([
+            Resize(256),
+            CenterCrop(224),
+            ToTensor(),
+            Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+        ])
+        self.train_dataset = DogDataset(config['root_folder'], dataset_type='train', transform=data_transform)
+        self.validation_dataset = DogDataset(config['root_folder'], dataset_type='validation', transform=data_transform)
+        self.test_dataset = DogDataset(config['root_folder'], dataset_type='test', transform=data_transform)
+        self.train_loader = DataLoader(self.train_dataset, batch_size=config['batch_size'], shuffle=True)
+        self.validation_loader = DataLoader(self.validation_dataset, batch_size=config['batch_size'], shuffle=False)
+        self.test_loader = DataLoader(self.test_dataset, batch_size=config['batch_size'], shuffle=False)
+        self.net_runner = None
+        self.predictor = None
 
-    def train_model(self, preview, validation_dataloader, early_stopping_patience=3, model_path=None):
-        # Create an instance of the DataTransform class with data augmentation enabled
-        data_transform = DataTransform(augment=True)
+    def set_model(self, model_path):
+        self.net_runner = NetRunner(model_path, self.train_loader, self.test_loader, self.validation_loader, self.config)
+        self.predictor = Predictor(model_path, num_classes=len(self.train_dataset.classes))
 
-        # Create a training dataset with data augmentation
-        training_dataset = DogBreedDataset(root_dir=self.root_dir, transform=data_transform)
+    def train_model(self):
+        if not self.net_runner:
+            raise ValueError('Model not set')
+        self.net_runner.train()
 
-        # Create a data loader with the training dataset
-        batch_size = 32
-        training_dataloader = DataLoader(training_dataset, batch_size=batch_size, shuffle=True)
+    def test_model(self):
+        if not self.net_runner:
+            raise ValueError('Model not set')
+        self.net_runner.test()
 
-        # Create an instance of the NetRunner class and train the model
-        netrunner = NetRunner(root_dir=self.root_dir, train=True, preview=preview, model_path=model_path)
-        netrunner.train(training_dataloader, validation_dataloader, early_stopping_patience)
-
-
-    def evaluate_model(self, model_path=None):
-        data_transform = DataTransform(augment=False)
-        validation_dataset = DogBreedDataset(root_dir=self.root_dir, transform=data_transform)
-        validation_dataloader = DataLoader(validation_dataset, batch_size=32)
-        netrunner = NetRunner(root_dir=self.root_dir, train=False, preview=False, model_path=model_path)
-        netrunner.evaluate(validation_dataloader)
-
-    def predict_breed(self, img_path, model_path=None):
-        prediction = Prediction(model_path=model_path)
-        return prediction.predict(img_path)
+    def predict_breed(self, image_path):
+        if not self.predictor:
+            raise ValueError('Model not set')
+        pred_class = self.predictor.predict(image_path)
+        return pred_class

@@ -1,0 +1,10 @@
+{
+    "root_folder": "",
+    "learning_rate": 0.001,
+    "momentum": 0.9,
+    "num_epochs": 10,
+    "patience": 3,
+    "batch_size": 16,
+    "early_stopping_patience": 3,
+    "embedding_size": 27
+}

@@ -2,26 +2,34 @@ import os
 from torch.utils.data import Dataset
 from PIL import Image
 
-class DogBreedDataset(Dataset):
-    def __init__(self, root_dir, transform=None):
+class DogDataset(Dataset):
+    def __init__(self, root_dir, dataset_type, transform=None):
         self.root_dir = root_dir
+        self.dataset_type = dataset_type
         self.transform = transform
-        self.breeds = ['n02088364-beagle', 'n02110185-Siberian_husky', 'n02113624-toy_poodle']
+        self.classes = ['Beagle', 'Siberian Husky', 'Toy Poodle']
+        self.class_to_folder = {
+            'Beagle': 'Beagle',
+            'Siberian Husky': 'Siberian Husky',
+            'Toy Poodle': 'Toy Poodle'
+        }
+        self.class_to_idx = {c: i for i, c in enumerate(self.classes)}
+        self.idx_to_class = {i: c for i, c in enumerate(self.classes)}
         self.data = []
-        for breed in self.breeds:
-            breed_dir = os.path.join(self.root_dir, 'Images', breed)
-            for file in os.listdir(breed_dir):
-                if file.endswith('.jpg'):
-                    img_path = os.path.join(breed_dir, file)
-                    annotation_path = os.path.join(self.root_dir, 'Annotation', breed, file.replace('.jpg', '.xml'))
-                    self.data.append((img_path, annotation_path, breed))
+        for c in self.classes:
+            class_dir = os.path.join(self.root_dir, 'StanfordDogs', 'Images', self.dataset_type, self.class_to_folder[c])
+            for fname in os.listdir(class_dir):
+                if fname.endswith('.jpg'):
+                    path = os.path.join(class_dir, fname)
+                    item = (path, self.class_to_idx[c])
+                    self.data.append(item)
 
     def __len__(self):
         return len(self.data)
 
     def __getitem__(self, idx):
-        img_path, annotation_path, breed = self.data[idx]
-        image = Image.open(img_path).convert('RGB')
+        path, label = self.data[idx]
+        image = Image.open(path).convert('RGB')
         if self.transform:
             image = self.transform(image)
-        return image, breed
+        return image, label
