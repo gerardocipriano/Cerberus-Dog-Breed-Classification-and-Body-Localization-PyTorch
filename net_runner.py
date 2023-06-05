@@ -95,6 +95,12 @@ class NetRunner:
             if val_acc > best_acc:
                 best_acc=val_acc
                 best_model_wts=self.model.state_dict()
+                
+                # Save the best model weights to disk
+                save_path = 'best_model.pth'
+                torch.save(best_model_wts, save_path)
+                print(f'Saved best model weights to {save_path}')
+                
                 early_stopping_counter=0
                 print(f'Best val Acc: {best_acc:.4f}')
             else:
@@ -104,6 +110,7 @@ class NetRunner:
                     break
 
         self.model.load_state_dict(best_model_wts)
+
 
     def evaluate(self, dataset):
         self.model.eval()
