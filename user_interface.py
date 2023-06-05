@@ -8,9 +8,23 @@ class UserInterface:
         self.data_model_manager = data_model_manager
         self.window = tk.Tk()
         self.window.title('Cerberus - Dog Breed Classifier')
-        self.window.geometry('400x200')
+        
+        # Set the window size
+        self.window.geometry('500x550')
+        
         self.window.iconbitmap('res/logo.ico')
         self.model_path = None
+
+        # Load the image from the res/ folder
+        image = tk.PhotoImage(file='res/cerberus.png')
+        
+        # Resize the image using the subsample method
+        image = image.subsample(3, 3)
+        
+        # Create a new Label widget to display the image
+        image_label = tk.Label(self.window, image=image)
+        image_label.image = image
+        image_label.pack()
 
     def run(self):
         self._build_model_selection_frame()
