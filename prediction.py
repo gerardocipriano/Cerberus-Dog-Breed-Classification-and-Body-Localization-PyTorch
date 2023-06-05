@@ -1,7 +1,5 @@
 import torch
-import os
 from PIL import Image
-from torchvision.models import alexnet
 from torchvision.transforms import Compose, Resize, CenterCrop, ToTensor, Normalize
 
 from utils import load_alexnet_model

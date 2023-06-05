@@ -3,12 +3,9 @@ import shutil
 import time
 import torch
 from torch.utils.tensorboard import SummaryWriter
-from torchvision.models import alexnet
 from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as plt
 import torchvision
-import numpy as np
-import os
 
 from utils import load_alexnet_model
 
