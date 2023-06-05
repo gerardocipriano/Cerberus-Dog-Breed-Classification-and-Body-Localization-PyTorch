@@ -1,5 +1,7 @@
 import tkinter as tk
 from tkinter import filedialog
+import os
+from tkinter import messagebox
 
 class UserInterface:
     def __init__(self, data_model_manager):
@@ -24,6 +26,10 @@ class UserInterface:
         label.pack(side=tk.LEFT, padx=10)
         button = tk.Button(frame, text='Browse', command=self._select_model)
         button.pack(side=tk.RIGHT, padx=10)
+        
+        # Add a new button to create a new AlexNet model
+        create_button = tk.Button(frame, text='Create New Model', command=self._create_new_model)
+        create_button.pack(side=tk.RIGHT, padx=10)
 
     def _build_train_frame(self):
         frame = tk.Frame(self.window)
@@ -51,22 +57,33 @@ class UserInterface:
 
     def _select_model(self):
         self.model_path = filedialog.askopenfilename(filetypes=[('PyTorch model', '*.pth')])
+        
+        # Check if the provided model path is valid
+        if not os.path.exists(self.model_path):
+            # Prompt the user that the provided model path is invalid
+            messagebox.showerror("Error", "The specified model path is invalid. Please create a new model using the 'Create New Model' button.")
+            return
+            
         print(f'Selected model: {self.model_path}')
         self.data_model_manager.set_model(self.model_path)
 
 
+    def _create_new_model(self):
+         # Call the create_new_model method of the data_model_manager to create a new AlexNet model
+         num_classes = len(self.data_model_manager.train_dataset.classes)
+         save_path = self.data_model_manager.create_new_model(num_classes)
+         
+         # Set the newly created AlexNet model as the current model
+         self.model_path = save_path
+         self.data_model_manager.set_model(save_path)
 
     def _train_model(self):
         print('Training model...')
         self.data_model_manager.train_model()
 
-
-
     def _evaluate_model(self):
         print('Evaluating model...')
         self.data_model_manager.test_model()
-
-
 
     def _predict_breed(self):
         image_path = filedialog.askopenfilename(filetypes=[('Image', '*.jpg;*.jpeg;*.png')])
