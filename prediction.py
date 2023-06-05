@@ -21,7 +21,11 @@ class Predictor:
             try:
                 # Create a new AlexNet model
                 model = alexnet(weights='DEFAULT')
+                # Freeze all the weights in the model
+                for param in model.parameters():
+                    param.requires_grad = False
                 num_ftrs = model.classifier[6].in_features
+                # Replace the last layer with a new one with the correct number of classes
                 model.classifier[6] = torch.nn.Linear(num_ftrs, num_classes)
                 # Load the saved weights into the model
                 model.load_state_dict(torch.load(model_path))
@@ -30,22 +34,25 @@ class Predictor:
                 print(f'Error loading model from {model_path}: {e}')
                 print(f'Creating new AlexNet model')
                 model = alexnet(weights='DEFAULT')
+                # Freeze all the weights in the model
+                for param in model.parameters():
+                    param.requires_grad = False
                 num_ftrs = model.classifier[6].in_features
+                # Replace the last layer with a new one with the correct number of classes
                 model.classifier[6] = torch.nn.Linear(num_ftrs, num_classes)
-                # Save the downloaded model weights to disk
-                save_path = os.path.join(self.config['root_folder'], 'alexnet_pretrained.pth')
-                torch.save(model.state_dict(), save_path)
-                print(f'Saved downloaded AlexNet model weights to {save_path}')
         else:
             print(f'Creating new AlexNet model')
             model = alexnet(weights='DEFAULT')
+            # Freeze all the weights in the model
+            for param in model.parameters():
+                param.requires_grad = False
             num_ftrs = model.classifier[6].in_features
+            # Replace the last layer with a new one with the correct number of classes
             model.classifier[6] = torch.nn.Linear(num_ftrs, num_classes)
-            # Save the downloaded model weights to disk
-            save_path = os.path.join(self.config['root_folder'], 'alexnet_pretrained.pth')
-            torch.save(model.state_dict(), save_path)
-            print(f'Saved downloaded AlexNet model weights to {save_path}')
         return model
+
+
+
 
     def predict(self, image_path):
         image = Image.open(image_path).convert('RGB')
