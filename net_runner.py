@@ -18,6 +18,10 @@ class NetRunner:
         self.test_set = test_set
         self.val_set = val_set
         self.config = config
+        
+        # Set the model_path attribute with the provided model path
+        self.model_path = model_path
+        
         self.model = self._load_model(model_path, num_classes).to(self.device)
         self.criterion = torch.nn.CrossEntropyLoss()
         self.optimizer = torch.optim.SGD(self.model.parameters(), lr=config['learning_rate'], momentum=config['momentum'])
@@ -33,11 +37,9 @@ class NetRunner:
         self.writer.add_graph(self.model, dummy_input)
         self.writer.flush()
 
-
     def _load_model(self, model_path, num_classes):
         self.model = load_alexnet_model(model_path, num_classes).to(self.device)
         return self.model
-
 
     def train(self):
         best_acc = 0.0
@@ -96,8 +98,8 @@ class NetRunner:
                 best_acc=val_acc
                 best_model_wts=self.model.state_dict()
                 
-                # Save the best model weights to disk
-                save_path = 'best_model.pth'
+                # Save the best model weights to the specified model path
+                save_path = self.model_path
                 torch.save(best_model_wts, save_path)
                 print(f'Saved best model weights to {save_path}')
                 
