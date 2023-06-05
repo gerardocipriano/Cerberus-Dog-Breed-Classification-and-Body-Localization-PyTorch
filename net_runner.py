@@ -101,14 +101,14 @@ class NetRunner:
                 # Save the best model weights to the specified model path
                 save_path = self.model_path
                 torch.save(best_model_wts, save_path)
-                print(f'Saved best model weights to {save_path}')
+                print(f'TRAINING - INFO - Saved best model weights to {save_path}')
                 
                 early_stopping_counter=0
-                print(f'Best val Acc: {best_acc:.4f}')
+                print(f'TRAINING - INFO - Best val Acc: {best_acc:.4f}')
             else:
                 early_stopping_counter += 1
                 if early_stopping_counter >= self.config['early_stopping_patience']:
-                    print(f'Early stopping after {early_stopping_counter} epochs with no improvement')
+                    print(f'TRAINING - INFO - Early stopping after {early_stopping_counter} epochs with no improvement')
                     break
 
         self.model.load_state_dict(best_model_wts)

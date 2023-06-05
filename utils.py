@@ -17,10 +17,10 @@ def load_alexnet_model(model_path, num_classes):
             model.classifier[6] = torch.nn.Linear(num_ftrs, num_classes)
             # Load the saved weights into the model
             model.load_state_dict(torch.load(model_path))
-            print(f'Loaded model weights from {model_path}')
+            print(f'INFO - Loaded model weights from {model_path}')
             return model
         except Exception as e:
-            print(f'Error loading model from {model_path}: {e}')
+            print(f'ERROR - Error loading model from {model_path}: {e}')
     else:
         # Prompt the user that the provided model path is invalid
         messagebox.showerror("Error", "The specified model path is invalid. Please create a new model using the 'Create New Model' button.")

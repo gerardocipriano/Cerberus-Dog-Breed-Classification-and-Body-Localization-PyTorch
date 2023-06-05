@@ -35,24 +35,24 @@ class DataModelManager:
 
     def train_model(self):
         if not self.net_runner:
-            raise ValueError('Model not set')
+            raise ValueError('ERROR - Model not set')
         self.net_runner.train()
 
     def test_model(self):
         if not self.net_runner:
-            raise ValueError('Model not set')
+            raise ValueError('ERROR - Model not set')
         self.net_runner.test()
 
     def predict_breed(self, image_path):
         if not self.predictor:
-            raise ValueError('Model not set')
+            raise ValueError('ERROR - Model not set')
         pred_class = self.predictor.predict(image_path)
         return pred_class
 
     # Add a new method to create a new AlexNet model
     def create_new_model(self, num_classes):
          # Create a new default AlexNet model and save it to disk
-         print(f'Creating new default AlexNet model')
+         print(f'INFO - Creating new default AlexNet model')
          model = alexnet(weights='DEFAULT')
          for param in model.parameters():
              param.requires_grad = False
@@ -66,5 +66,5 @@ class DataModelManager:
          torch.save(model.state_dict(), save_path)
          
          # Set the newly created AlexNet model as the current model
-         print(f'Saved default AlexNet model to {save_path}')
+         print(f'INFO - Saved default AlexNet model to {save_path}')
          return save_path
