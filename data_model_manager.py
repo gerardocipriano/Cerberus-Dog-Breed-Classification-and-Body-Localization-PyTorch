@@ -25,7 +25,7 @@ class DataModelManager:
 
     def set_model(self, model_path):
         self.net_runner = NetRunner(model_path, self.train_loader, self.test_loader, self.validation_loader, self.config)
-        self.predictor = Predictor(model_path, num_classes=len(self.train_dataset.classes))
+        self.predictor = Predictor(model_path, num_classes=len(self.train_dataset.classes), class_names=self.train_dataset.classes)
 
     def train_model(self):
         if not self.net_runner:
