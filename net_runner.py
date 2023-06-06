@@ -99,15 +99,19 @@ class NetRunner:
             # Add embeddings to TensorBoard
             features = []
             labels = []
+            images = []
             for inputs, label in self.val_set:
                 inputs=inputs.to(self.device) 
                 with torch.set_grad_enabled(False):
                     output=self.model(inputs) 
                     features.append(output) 
                     labels.append(label) 
+                    images.append(inputs)
                         
             features=torch.cat(features).cpu().numpy() 
             labels=torch.cat(labels).cpu().numpy() 
+            images=torch.cat(images).cpu()
+            
             class_names=self.val_set.dataset.classes 
             label_names=[class_names[i] for i in labels] 
             metadata=[f'{label}:{name}' for label,name in zip(labels,label_names)] 
@@ -132,7 +136,7 @@ class NetRunner:
                     break
 
         self.model.load_state_dict(best_model_wts)
-        self.writer.add_embedding(features,metadata=metadata,label_img=None,global_step=epoch) 
+        self.writer.add_embedding(features,metadata=metadata,label_img=images,global_step=epoch) 
 
     def evaluate(self, dataset):
         self.model.eval()
