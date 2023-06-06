@@ -32,7 +32,7 @@ def load_alexnet_model(model_path, num_classes):
 def create_new_model(num_classes):
     # Create a new default AlexNet model and save it to disk
     print(f'INFO - Creating new default AlexNet model')
-    model = alexnet(pretrained=True)
+    model = alexnet(weights='DEFAULT')
     for param in model.parameters():
         param.requires_grad = False
     num_ftrs = model.classifier[6].in_features

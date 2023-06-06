@@ -83,9 +83,7 @@ class UserInterface:
 
 
     def _create_new_model(self):
-         # Call the create_new_model method of the data_model_manager to create a new AlexNet model
-         num_classes = len(self.data_model_manager.train_dataset.classes)
-         save_path = self.data_model_manager.create_new_model(num_classes)
+         save_path = self.data_model_manager.create_new_model()
          
          # Set the newly created AlexNet model as the current model
          self.model_path = save_path
