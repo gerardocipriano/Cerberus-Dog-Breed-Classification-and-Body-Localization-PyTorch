@@ -6,6 +6,8 @@ from torch.utils.tensorboard import SummaryWriter
 from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as plt
 import torchvision
+import warnings
+
 
 from utils import load_alexnet_model
 
@@ -81,6 +83,7 @@ class NetRunner:
             self.writer.add_scalar('Accuracy/train', epoch_acc, epoch)
 
             # Calculate and visualize confusion matrix
+            warnings.filterwarnings('ignore')
             cm = confusion_matrix(all_labels, all_preds)
             fig = plt.figure()
             ax = fig.add_subplot(111)
