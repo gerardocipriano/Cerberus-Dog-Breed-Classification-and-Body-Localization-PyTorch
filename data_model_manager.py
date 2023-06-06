@@ -35,19 +35,25 @@ class DataModelManager:
 
     def train_model(self):
         if not self.net_runner:
-            raise ValueError('ERROR - Model not set')
+            raise ValueError('Model not set')
+        
+        # Train the model
         self.net_runner.train()
+        
+        # Update the Predictor with the new model weights
+        self.predictor = Predictor(self.net_runner.model_path, num_classes=len(self.train_dataset.classes), class_names=self.train_dataset.classes)
 
     def test_model(self):
         if not self.net_runner:
-            raise ValueError('ERROR - Model not set')
+            raise ValueError('Model not set')
         self.net_runner.test()
 
     def predict_breed(self, image_path):
         if not self.predictor:
-            raise ValueError('ERROR - Model not set')
+            raise ValueError('Model not set')
         pred_class = self.predictor.predict(image_path)
         return pred_class
+
 
     # Add a new method to create a new AlexNet model
     def create_new_model(self, num_classes):
