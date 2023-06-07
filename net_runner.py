@@ -51,15 +51,12 @@ class NetRunner:
             self.model.train()
             running_loss = 0.0
             running_corrects = 0
-
             all_labels = []
             all_preds = []
             for inputs, labels in self.train_set:
-
                 # Visualize the first batch of training images
                 img_grid = torchvision.utils.make_grid(inputs)
                 self.writer.add_image('first_batch', img_grid, global_step=epoch)
-
                 inputs = inputs.to(self.device)
                 labels = labels.to(self.device)
                 self.optimizer.zero_grad()
@@ -69,13 +66,10 @@ class NetRunner:
                     loss = self.criterion(outputs, labels)
                     loss.backward()
                     self.optimizer.step()
-
                     all_labels.extend(labels.cpu().numpy())
                     all_preds.extend(preds.cpu().numpy())
-
-                running_loss += loss.item() * inputs.size(0)
-                running_corrects += torch.sum(preds == labels.data)
-
+                    running_loss += loss.item() * inputs.size(0)
+                    running_corrects += torch.sum(preds == labels.data)
             epoch_loss = running_loss / len(self.train_set.dataset)
             epoch_acc = running_corrects.double() / len(self.train_set.dataset)
             print(f'Train Loss: {epoch_loss:.4f} Acc: {epoch_acc:.4f}')
@@ -96,47 +90,74 @@ class NetRunner:
             self.writer.add_figure('confusion_matrix_train', fig, epoch)
             plt.close()
 
+            # Calcolo della confusion matrix per il validation set
+            all_labels = []
+            all_preds = []
+            self.model.eval()
+            for inputs, labels in self.val_set:
+                inputs = inputs.to(self.device)
+                labels = labels.to(self.device)
+                with torch.set_grad_enabled(False):
+                    outputs = self.model(inputs)
+                    _, preds = torch.max(outputs, 1)
+                    all_labels.extend(labels.cpu().numpy())
+                    all_preds.extend(preds.cpu().numpy())
+
+            cm = confusion_matrix(all_labels, all_preds)
+            fig = plt.figure()
+            ax = fig.add_subplot(111)
+            cax=ax.matshow(cm)
+            fig.colorbar(cax)
+            ax.set_xticklabels([''] + self.val_set.dataset.classes)
+            ax.set_yticklabels([''] + self.val_set.dataset.classes)
+            plt.xlabel('Predicted')
+            plt.ylabel('True')
+            self.writer.add_figure('confusion_matrix_val', fig, epoch) 
+            plt.close()
+
             # Add embeddings to TensorBoard
             features = []
             labels = []
             images = []
             for inputs, label in self.val_set:
-                inputs=inputs.to(self.device) 
+                inputs=inputs.to(self.device)
                 with torch.set_grad_enabled(False):
-                    output=self.model(inputs) 
-                    features.append(output) 
-                    labels.append(label) 
+                    output=self.model(inputs)
+                    features.append(output)
+                    labels.append(label)
                     images.append(inputs)
-                        
-            features=torch.cat(features).cpu().numpy() 
-            labels=torch.cat(labels).cpu().numpy() 
+
+            features=torch.cat(features).cpu().numpy()
+            labels=torch.cat(labels).cpu().numpy()
             images=torch.cat(images).cpu()
-            
-            class_names=self.val_set.dataset.classes 
-            label_names=[class_names[i] for i in labels] 
-            metadata=[f'{label}:{name}' for label,name in zip(labels,label_names)] 
-                
+
+            class_names=self.val_set.dataset.classes
+            label_names=[class_names[i] for i in labels]
+            metadata=[f'{label}:{name}' for label,name in zip(labels,label_names)]
 
             val_acc=self.evaluate(self.val_set)
+
             if val_acc > best_acc:
                 best_acc=val_acc
                 best_model_wts=self.model.state_dict()
-                
+
                 # Save the best model weights to the specified model path
                 save_path = self.model_path
                 torch.save(best_model_wts, save_path)
+
                 print(f'TRAINING - INFO - Saved best model weights to {save_path}')
-                
                 early_stopping_counter=0
+
                 print(f'TRAINING - INFO - Best val Acc: {best_acc:.4f}')
+            
             else:
                 early_stopping_counter += 1
                 if early_stopping_counter >= self.config['early_stopping_patience']:
                     print(f'TRAINING - INFO - Early stopping after {early_stopping_counter} epochs with no improvement')
                     break
 
-        self.model.load_state_dict(best_model_wts)
-        self.writer.add_embedding(features,metadata=metadata,label_img=images,global_step=epoch) 
+            self.model.load_state_dict(best_model_wts)
+            self.writer.add_embedding(features,metadata=metadata,label_img=images,global_step=epoch)
 
     def evaluate(self, dataset):
         self.model.eval()
