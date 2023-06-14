@@ -37,8 +37,8 @@ class CatTrainer:
     def train(self):
         best_acc = 0.0
         early_stopping_counter = 0
-        for epoch in range(5):
-            print(f'Epoch {epoch + 1}/{5}')
+        for epoch in range(self.config['num_epochs_cats']):
+            print(f'Epoch {epoch + 1}/{self.config["num_epochs_cats"]}')
             self.model.train()
             running_loss = 0.0
             running_corrects = 0
