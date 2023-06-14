@@ -76,7 +76,7 @@ class DataModelManager:
         self.cat_validation_loader = DataLoader(self.cat_validation_dataset, batch_size=batch_size, shuffle=False)
     
     def train_cat_model(self):
-       print('Training model on cats...')
+
        if not self.cat_trainer:
            num_classes=len(self.cat_train_dataset.classes)
            cat_config=self.config.copy()

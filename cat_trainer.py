@@ -3,7 +3,11 @@ import time
 import torch
 from utils import load_alexnet_model
 from torch.utils.tensorboard import SummaryWriter
-
+from sklearn.metrics import confusion_matrix
+import numpy as np
+import torchvision
+import matplotlib.pyplot as plt
+import warnings
 
 class CatTrainer:
     def __init__(self, model_path, train_set, val_set, config, num_classes):
@@ -26,74 +30,78 @@ class CatTrainer:
 
     def _load_model(self, model_path, num_classes):
         self.model = load_alexnet_model(model_path, num_classes).to(self.device)
-        
-        # Unfreeze the weights of the model
         for param in self.model.parameters():
             param.requires_grad = True
-        
         return self.model
 
     def train(self):
         best_acc = 0.0
         early_stopping_counter = 0
-        
-        for epoch in range(5): # Train for 5 epochs
+        for epoch in range(5):
             print(f'Epoch {epoch + 1}/{5}')
             self.model.train()
             running_loss = 0.0
             running_corrects = 0
-            
-            for inputs, labels in self.train_set:
+            for i, (inputs, labels) in enumerate(self.train_set):
                 inputs = inputs.to(self.device)
                 labels = labels.to(self.device)
                 self.optimizer.zero_grad()
-                
                 with torch.set_grad_enabled(True):
                     outputs = self.model(inputs)
                     _, preds = torch.max(outputs, 1)
                     loss = self.criterion(outputs, labels)
                     loss.backward()
                     self.optimizer.step()
-                    
-                    running_loss += loss.item() * inputs.size(0)
-                    running_corrects += torch.sum(preds == labels.data)
-            
+                running_loss += loss.item() * inputs.size(0)
+                running_corrects += torch.sum(preds == labels.data)
+                if i == 0:
+                    img_grid = torchvision.utils.make_grid(inputs)
+                    self.writer.add_image('first_batch', img_grid, epoch)
             epoch_loss = running_loss / len(self.train_set.dataset)
             epoch_acc = running_corrects.double() / len(self.train_set.dataset)
             print(f'Train Loss: {epoch_loss:.4f} Acc: {epoch_acc:.4f}')
-            
-            # Log the training loss and accuracy to TensorBoard
             self.writer.add_scalar('Loss/train', epoch_loss, epoch)
             self.writer.add_scalar('Accuracy/train', epoch_acc, epoch)
 
-            val_acc = self.evaluate(self.val_set)
+            val_acc, cm = self.evaluate(self.val_set)
+            # Calculate and visualize confusion matrix
+            warnings.filterwarnings('ignore')
+            fig=plt.figure()
+            ax=fig.add_subplot(111)
+            cax=ax.matshow(cm,cmap='Blues')
+            fig.colorbar(cax)
+            ax.set_xticklabels([''] + self.train_set.dataset.classes)
+            ax.set_yticklabels([''] + self.train_set.dataset.classes)
+            plt.xlabel('Predicted')
+            plt.ylabel('True')
+            plt.tight_layout()
+            self.writer.add_figure('confusion_matrix_train', fig, epoch)
+            plt.close()
 
             if val_acc > best_acc:
                 best_acc=val_acc
-
-                print(f'TRAINING - INFO - Best val Acc: {best_acc:.4f}')
-            
+                print(f'CAT - TRAINING - INFO - Best val Acc: {best_acc:.4f}')
             else:
                 early_stopping_counter += 1
                 if early_stopping_counter >= 3:
-                    print(f'TRAINING - INFO - Early stopping after {early_stopping_counter} epochs with no improvement')
+                    print(f'CAT - TRAINING - INFO - Early stopping after {early_stopping_counter} epochs with no improvement')
                     break
-        
-        print('Training finished') # Print a log when the training is finished
+
+
+        print('CAT - TRAINING - INFO - Training finished')
 
     def evaluate(self, dataset):
         self.model.eval()
-        running_corrects=0
-        
+        all_preds = []
+        all_labels = []
         for inputs, labels in dataset:
             inputs=inputs.to(self.device)
             labels=labels.to(self.device)
-            
             with torch.set_grad_enabled(False):
                 outputs=self.model(inputs)
                 _, preds=torch.max(outputs, 1)
-                running_corrects+=torch.sum(preds==labels.data)
-        
-        acc=running_corrects.double()/len(dataset.dataset)
-        
-        return acc
+                all_preds.extend(preds.cpu().numpy())
+                all_labels.extend(labels.cpu().numpy())
+        cm=confusion_matrix(all_labels,all_preds)
+        acc=np.sum(np.diag(cm))/np.sum(cm)
+        return acc, cm

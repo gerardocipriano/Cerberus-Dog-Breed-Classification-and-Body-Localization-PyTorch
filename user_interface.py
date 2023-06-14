@@ -101,7 +101,7 @@ class UserInterface:
        self.data_model_manager.set_model(self.model_path)
 
     def _train_model(self):
-       print('Training model...')
+       print('Training model on dog breeds...')
        # Set the train_button_clicked flag to True to enable the cat_train_button
        self.train_button_clicked=True
        self.cat_train_button.config(state=tk.NORMAL)

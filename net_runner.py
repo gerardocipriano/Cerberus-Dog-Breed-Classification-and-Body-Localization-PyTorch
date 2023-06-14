@@ -158,6 +158,7 @@ class NetRunner:
 
             self.model.load_state_dict(best_model_wts)
             self.writer.add_embedding(features,metadata=metadata,label_img=images,global_step=epoch)
+            print('DOG - TRAINING - INFO - Training finished')
 
     def evaluate(self, dataset):
         self.model.eval()
