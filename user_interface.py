@@ -98,6 +98,7 @@ class UserInterface:
     def _create_new_model(self):
        save_path=self.data_model_manager.create_new_model()
        self.model_path=save_path
+       self.data_model_manager.set_model(self.model_path)
 
     def _train_model(self):
        print('Training model...')
