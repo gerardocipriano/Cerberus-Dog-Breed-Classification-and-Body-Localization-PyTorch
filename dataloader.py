@@ -17,7 +17,7 @@ class DogDataset(Dataset):
         self.idx_to_class = {i: c for i, c in enumerate(self.classes)}
         self.data = []
         for c in self.classes:
-            class_dir = os.path.join(self.root_dir, 'StanfordDogs', 'Images', self.dataset_type, self.class_to_folder[c])
+            class_dir = os.path.join(self.root_dir, 'dogs', 'Images', self.dataset_type, self.class_to_folder[c])
             for fname in os.listdir(class_dir):
                 if fname.endswith('.jpg'):
                     path = os.path.join(class_dir, fname)
