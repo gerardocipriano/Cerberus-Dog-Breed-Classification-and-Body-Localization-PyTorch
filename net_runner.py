@@ -30,7 +30,7 @@ class NetRunner:
 
         timestamp = time.time()
         date_time = datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d_%H-%M-%S')
-        name = 'cerb_exp_'
+        name = 'dog_exp_'
         run_name = name + date_time
         self.writer = SummaryWriter(f'runs/{run_name}')
 
@@ -158,6 +158,7 @@ class NetRunner:
 
             self.model.load_state_dict(best_model_wts)
             self.writer.add_embedding(features,metadata=metadata,label_img=images,global_step=epoch)
+            print('DOG - TRAINING - INFO - Training finished')
 
     def evaluate(self, dataset):
         self.model.eval()
