@@ -30,7 +30,7 @@ class NetRunner:
 
         timestamp = time.time()
         date_time = datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d_%H-%M-%S')
-        name = 'cerb_exp_'
+        name = 'cat_exp_'
         run_name = name + date_time
         self.writer = SummaryWriter(f'runs/{run_name}')
 
