@@ -5,6 +5,6 @@
     "num_epochs": 10,
     "patience": 3,
     "batch_size": 16,
-    "early_stopping_patience": 6,
+    "early_stopping_patience": 12,
     "embedding_size": 27
 }
