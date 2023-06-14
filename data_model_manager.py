@@ -2,7 +2,7 @@
 from torch.utils.data import DataLoader
 from torchvision.transforms import Compose, Resize, CenterCrop, ToTensor, Normalize
 
-from dataloader import DogDataset
+from dataloader import *
 from net_runner import NetRunner
 from prediction import Predictor
 
@@ -14,6 +14,7 @@ class DataModelManager:
         self._initialize_data_loaders()
         self.net_runner = None
         self.predictor = None
+        self.cat_trainer = None
 
     def set_model(self, model_path):
         num_classes = len(self.train_dataset.classes)
@@ -23,13 +24,13 @@ class DataModelManager:
     def train_model(self):
         if not self.net_runner:
             raise ValueError('Model not set')
-        
-        # Train the model
         self.net_runner.train()
-        
-        # Update the Predictor with the new model weights
         num_classes = len(self.train_dataset.classes)
         self.predictor = Predictor(self.net_runner.model_path, num_classes, class_names=self.train_dataset.classes)
+        
+        # Update the cat_trainer with the trained model
+        if self.cat_trainer:
+            self.cat_trainer.set_model(self.net_runner.model_path)
 
     def test_model(self):
         if not self.net_runner:
@@ -43,9 +44,9 @@ class DataModelManager:
         return pred_class
 
     def create_new_model(self):
-         num_classes = len(self.train_dataset.classes)
-         save_path = create_new_model(num_classes)
-         return save_path
+        num_classes = len(self.train_dataset.classes)
+        save_path = create_new_model(num_classes)
+        return save_path
 
     def _initialize_data_loaders(self):
         data_transform = Compose([
@@ -58,6 +59,7 @@ class DataModelManager:
         root_folder = self.config['root_folder']
         batch_size = self.config['batch_size']
         
+        # Initialize the dog data loaders
         self.train_dataset = DogDataset(root_folder, dataset_type='train', transform=data_transform)
         self.validation_dataset = DogDataset(root_folder, dataset_type='validation', transform=data_transform)
         self.test_dataset = DogDataset(root_folder, dataset_type='test', transform=data_transform)
@@ -65,3 +67,11 @@ class DataModelManager:
         self.train_loader = DataLoader(self.train_dataset, batch_size=batch_size, shuffle=True)
         self.validation_loader = DataLoader(self.validation_dataset, batch_size=batch_size, shuffle=False)
         self.test_loader = DataLoader(self.test_dataset, batch_size=batch_size, shuffle=False)
+        
+        # Initialize the cat data loaders
+        self.cat_train_dataset = CatDataset(root_folder, dataset_type='train', transform=data_transform)
+        self.cat_validation_dataset = CatDataset(root_folder, dataset_type='validation', transform=data_transform)
+        self.cat_test_dataset = CatDataset(root_folder, dataset_type='test', transform=data_transform)
+        
+        self.cat_train_loader = DataLoader(self.cat_train_dataset, batch_size=batch_size, shuffle=True)
+        self.cat_validation_loader = DataLoader(self.cat_validation_dataset, batch_size=batch_size, shuffle=False)
