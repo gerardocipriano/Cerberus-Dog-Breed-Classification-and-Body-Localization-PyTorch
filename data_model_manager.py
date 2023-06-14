@@ -1,11 +1,10 @@
-
 from torch.utils.data import DataLoader
 from torchvision.transforms import Compose, Resize, CenterCrop, ToTensor, Normalize
-
-from dataloader import *
+from dataloader import DogDataset
+from dataloader import CatDataset
 from net_runner import NetRunner
+from cat_trainer import CatTrainer
 from prediction import Predictor
-
 from utils import create_new_model
 
 class DataModelManager:
@@ -75,3 +74,32 @@ class DataModelManager:
         
         self.cat_train_loader = DataLoader(self.cat_train_dataset, batch_size=batch_size, shuffle=True)
         self.cat_validation_loader = DataLoader(self.cat_validation_dataset, batch_size=batch_size, shuffle=False)
+    
+    def train_cat_model(self):
+       print('Training model on cats...')
+       if not self.cat_trainer:
+           num_classes=len(self.cat_train_dataset.classes)
+           cat_config=self.config.copy()
+           cat_config['num_epochs']=5
+           cat_config['batch_size']=4
+           cat_config['early_stopping_patience']=2
+           cat_config['learning_rate']=0.001
+
+           # Create a new instance of the CatTrainer class and pass it the trained model path and the cat data loaders
+           model_path=self.net_runner.model_path
+           train_set=self.cat_train_loader
+           val_set=self.cat_validation_loader
+
+           # Create a new instance of the CatTrainer class and pass it the trained model path and the cat data loaders
+           model_path=self.net_runner.model_path
+           train_set=self.cat_train_loader
+           val_set=self.cat_validation_loader
+
+           # Create a new instance of the CatTrainer class and pass it the trained model path and the cat data loaders
+           model_path=self.net_runner.model_path
+           train_set=self.cat_train_loader
+           val_set=self.cat_validation_loader
+
+           self.cat_trainer=CatTrainer(model_path, train_set, val_set, cat_config, num_classes)
+
+       self.cat_trainer.train()
