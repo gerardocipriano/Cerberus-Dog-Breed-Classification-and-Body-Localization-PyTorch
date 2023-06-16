@@ -90,29 +90,47 @@ class NetRunner:
             self.writer.add_figure('confusion_matrix_train', fig, epoch)
             plt.close()
 
-            # Calcolo della confusion matrix per il validation set
-            all_labels = []
-            all_preds = []
-            self.model.eval()
-            for inputs, labels in self.val_set:
-                inputs = inputs.to(self.device)
-                labels = labels.to(self.device)
-                with torch.set_grad_enabled(False):
-                    outputs = self.model(inputs)
-                    _, preds = torch.max(outputs, 1)
-                    all_labels.extend(labels.cpu().numpy())
-                    all_preds.extend(preds.cpu().numpy())
+            # Calcolo della confusion matrix per il validation set e della loss di validation per ogni epoca.
+            all_labels_valset=[]
+            all_preds_valset=[]
+            
+            running_loss_valset=0.0
+            
+            
+            for inputs_valset, labels_valset in self.val_set:
+                inputs_valset=inputs_valset.to(self.device)
+                labels_valset=labels_valset.to(self.device)
 
-            cm = confusion_matrix(all_labels, all_preds)
-            fig = plt.figure()
-            ax = fig.add_subplot(111)
-            cax=ax.matshow(cm)
-            fig.colorbar(cax)
-            ax.set_xticklabels([''] + self.val_set.dataset.classes)
-            ax.set_yticklabels([''] + self.val_set.dataset.classes)
+                with torch.set_grad_enabled(False):
+                    outputs_valset=self.model(inputs_valset)
+                    _, preds_valset=torch.max(outputs_valset,1)
+                    
+                    loss_valset=self.criterion(outputs_valset,labels_valset)
+
+                all_labels_valset.extend(labels_valset.cpu().numpy())
+                all_preds_valset.extend(preds_valset.cpu().numpy())
+                
+                running_loss_valset+=loss_valset.item()*inputs_valset.size(0)
+                
+            epoch_loss_valset=running_loss_valset/len(self.val_set.dataset)
+            
+            print(f'Validation Loss: {epoch_loss_valset:.4f}')
+            self.writer.add_scalar('Loss/validation', epoch_loss_valset, epoch)
+            
+            cm_valset = confusion_matrix(all_labels_valset, all_preds_valset)
+
+            fig_valset_cm = plt.figure()
+            ax_valset_cm = fig_valset_cm.add_subplot(111)
+            cax_valset_cm = ax_valset_cm.matshow(cm_valset)
+            fig_valset_cm.colorbar(cax_valset_cm)
+
+            ax_valset_cm.set_xticklabels([''] + self.val_set.dataset.classes)
+            ax_valset_cm.set_yticklabels([''] + self.val_set.dataset.classes)
+
             plt.xlabel('Predicted')
             plt.ylabel('True')
-            self.writer.add_figure('confusion_matrix_val', fig, epoch) 
+
+            self.writer.add_figure('confusion_matrix_validation', fig_valset_cm, epoch)
             plt.close()
 
             # Add embeddings to TensorBoard
@@ -158,7 +176,7 @@ class NetRunner:
 
             self.model.load_state_dict(best_model_wts)
             self.writer.add_embedding(features,metadata=metadata,label_img=images,global_step=epoch)
-            print('DOG - TRAINING - INFO - Training finished')
+        print('DOG - TRAINING - INFO - Training finished')
 
     def evaluate(self, dataset):
         self.model.eval()
