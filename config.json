@@ -7,6 +7,6 @@
     "patience": 3,
     "batch_size": 32,
     "batch_size_cats": 4,
-    "early_stopping_patience": 1,
+    "early_stopping_patience": 10,
     "embedding_size": 27
 }
