@@ -1,7 +1,7 @@
 names:
-- '0'
-- '1'
-- '2'
+- nose
+- eyes
+- tail
 nc: 3
 roboflow:
   license: CC BY 4.0
