@@ -1,0 +1,14 @@
+names:
+- '0'
+- '1'
+- '2'
+nc: 3
+roboflow:
+  license: CC BY 4.0
+  project: cerberus
+  url: https://universe.roboflow.com/unibo-hheit/cerberus/dataset/10
+  version: 10
+  workspace: unibo-hheit
+test: ../test/images
+train: Cerberus-10/train/images
+val: Cerberus-10/valid/images
