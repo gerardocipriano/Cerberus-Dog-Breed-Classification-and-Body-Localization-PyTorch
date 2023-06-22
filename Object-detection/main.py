@@ -12,7 +12,7 @@ class Main:
 
 if __name__ == '__main__':
 
-    weights = './Cerberus/training_test_/weights/best.pt'
+    weights = './Cerberus/training_2/weights/best.pt'
     conf = 0.5
     img_size = 640
     data = './yolov5/Cerberus-12/data.yaml'
