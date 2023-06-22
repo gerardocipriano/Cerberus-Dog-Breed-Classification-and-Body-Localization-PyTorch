@@ -113,10 +113,13 @@ class UserInterface:
        self.data_model_manager.test_model()
 
     def _predict_breed(self):
-       image_path=filedialog.askopenfilename(filetypes=[('Image', '*.jpg;*.jpeg;*.png')])
-       print(f'Predicting breed for image: {image_path}')
-       pred_class=self.data_model_manager.predict_breed(image_path)
-       print(f'Predicted breed: {pred_class}')
+        image_path = filedialog.askopenfilename(filetypes=[('Image', '*.jpg;*.jpeg;*.png')])
+        print(f'Predicting breed for image: {image_path}')
+        pred_class = self.data_model_manager.predict_breed(image_path)
+        print(f'Predicted breed: {pred_class}')
+        
+        messagebox.showinfo("Prediction Result", f"The predicted breed is: {pred_class}")
+
 
     def _train_cat_model(self):
        print('Training model on cats...')
