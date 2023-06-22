@@ -93,7 +93,43 @@ Salvando gli embeddings durante l’addestramento delle razze di cani, è possib
 <div align="center">
     <img src="res/class_projection.jpg" alt="cluster" >
 </div><br>
-## Localizzazione
+
+## Rilevamento Degli Oggetti
+
+### Introduzione 
+
+L'object detection di Cerberus consiste nel localizzare all'interno di un immagine 3 parti del corpo
+di un animale, in particolare immagini di cani. Il software mette a disposizione una
+interfaccia nella quale l'utente può caricare un immagine, eseguire la detection e visualizzare il
+risultato con le bounding boxes associate. 
+Il software è contenuto nella directory Object-detection composto dai seguenti file:
+
+- create.ipynb: jupyter notebook con le istruzioni per il caricamento del dataset, allenamento
+del modello, validazione, e testing, usato durante lo sviluppo.
+- main.py: entry point dell'applicazione.
+- model.py: classe che che rappresenta il modello.
+- user_interface.py: definisce l'interfaccia utente e importa il modello.
+- ./Cerberus: contiene tutti i modelli addestrati in fase di progettazione. 
+- ./yolov5: contiente il modello yolov5 di ultralitycs.
+- ./yolov5/Cerberus-10, ./yolov5//Cerberus-12: 2 versioni del dataset usato per l'addestramento, la versione 12 è 
+la più recente. 
+<div align="center">
+    <img src="res/objGui.png" alt="gui" >
+</div><br>
+
+Il flusso di lavoro:
+
+Inizialmente le immagini sono state caricate su Roboflow(https://roboflow.com/) tool utilizzato per aggiungere annotazioni,
+applicare preprocessing e data augmentation. Successivamente è stato fatto l'addestramento del modello sul dataset generato, 
+e la valutazione delle performance.
+
+```mermaid
+flowchart LR
+    A(Upload) --> B(Annotate)
+    B  --> C(Train)
+    C --> D(Test)
+    D --> A
+```
 
 ### Dataset
 
