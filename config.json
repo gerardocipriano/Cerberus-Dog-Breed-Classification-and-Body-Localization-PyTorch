@@ -8,5 +8,11 @@
     "batch_size": 32,
     "batch_size_cats": 4,
     "early_stopping_patience": 3,
-    "embedding_size": 27
+    "embedding_size": 27,
+    "lr": 0.001,
+    "weight_decay": 0.0005,
+    "epochs": 10,
+    "project": "runs/train",
+    "name": "experiment",
+    "exist_ok": false
 }
