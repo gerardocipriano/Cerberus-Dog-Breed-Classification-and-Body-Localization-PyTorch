@@ -72,8 +72,8 @@ Cerberus is a PyTorch-based project for classifying dog breeds and localizing sp
 
 ### Installation
 
-1. Clone the repo
-   ...
+1. Just Clone/Download the repo
+   
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -82,15 +82,19 @@ Cerberus is a PyTorch-based project for classifying dog breeds and localizing sp
 ## Usage
 
 Classification and Localization functionalities are available in their respective user interfaces (GUIs).
+### Classification
 To utilize the classification feature, please follow these steps:
 
-Install the required dependencies mentioned in the .txt file.
-Run the .\main.py file.
+- Install the required dependencies mentioned in the .txt file.
+- Run the .\main.py file.
+- Within the classification GUI, you have the option to create a new alexnet model from scratch. This model can then be used for training, validation, or prediction purposes. If you already possess a pre-existing model, you can select it within the interface. Following the training phase, you can evaluate the model's performance using a cat dataset and examine the results.
+### Localization
 If you wish to utilize the localization feature, please run the .\Object-detection\main.py file.
 (Note: A unified GUI will be introduced in a future version of the project.)
-Within the classification GUI, you have the option to create a new alexnet model from scratch. This model can then be used for training, validation, or prediction purposes. If you already possess a pre-existing model, you can select it within the interface. Following the training phase, you can evaluate the model's performance using a cat dataset and examine the results.
 
-In the localization GUI, you can upload an image of a dog and the model. This allows you to precisely identify and localize various body parts. Additionally, you can monitor the output in real-time during this process by selecting the "Show model validation data" option.
+
+- In the localization GUI, you can upload an image of a dog and the model. This allows you to precisely identify and localize various body parts.
+- Additionally, you can monitor the output in real-time during this process by selecting the "Show model validation data" option.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
