@@ -11,12 +11,12 @@ class UserInterface:
         self.window = tk.Tk()
         self.window.title('Cerberus - Bodyparts Detector')
         self.window.geometry('1440x900')
-        self.window.iconbitmap('../res/logo.ico')
+        self.window.iconbitmap('res/logo.ico')
         self.weights_path = None
         self.train_button_clicked = False
         self.images_path = ''
 
-        image = tk.PhotoImage(file='../res/cerberus.png')
+        image = tk.PhotoImage(file='res/cerberus.png')
         image = image.subsample(3, 3)
         image_label = tk.Label(self.window, image=image)
         image_label.image = image
@@ -131,7 +131,7 @@ class UserInterface:
 
     def _evaluate_model(self):
         self.text_widget.delete(1.0, tk.END)
-        self.text_widget.insert(tk.END, "Running validation...\n")
+        self.text_widget.insert(tk.END, "Running validation.\n")
         self.window.update()
         
         try:
