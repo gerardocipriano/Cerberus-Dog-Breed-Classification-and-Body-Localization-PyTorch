@@ -98,18 +98,17 @@ Salvando gli embeddings durante l’addestramento delle razze di cani, è possib
 
 ### Introduzione 
 
-L'object detection di Cerberus consiste nel localizzare all'interno di un immagine 3 parti del corpo
-di un animale, in particolare immagini di cani. Il software mette a disposizione una
-interfaccia nella quale l'utente può caricare un immagine, eseguire la detection e visualizzare il
-risultato con le bounding boxes associate. 
+L'object detection di Cerberus consiste nel localizzare all'interno di immagini di cani 3 parti del corpo:
+occhi, naso, coda. Il software mette a disposizione una interfaccia dalla quale l'utente può caricare un immagine,
+eseguire la detection e visualizzarne il risultato con le bounding boxes associate. 
 Il software è contenuto nella directory Object-detection composto dai seguenti file:
 
 - create.ipynb: jupyter notebook con le istruzioni per il caricamento del dataset, allenamento
 del modello, validazione, e testing, usato durante lo sviluppo.
 - main.py: entry point dell'applicazione.
-- model.py: classe che che rappresenta il modello.
+- model.py: classe che rappresenta il modello.
 - user_interface.py: definisce l'interfaccia utente e importa il modello.
-- ./Cerberus: contiene tutti i modelli addestrati in fase di progettazione. 
+- ./Cerberus: contiene i 3 modelli addestrati in fase di progettazione. 
 - ./yolov5: contiente il modello yolov5 di ultralitycs.
 - ./yolov5/Cerberus-10, ./yolov5//Cerberus-12: 2 versioni del dataset usato per l'addestramento, la versione 12 è 
 la più recente. 
@@ -117,11 +116,27 @@ la più recente.
     <img src="res/objGui.png" alt="gui" >
 </div><br>
 
-Il flusso di lavoro:
+### Preparazione Dataset
 
-Inizialmente le immagini sono state caricate su Roboflow(https://roboflow.com/) tool utilizzato per aggiungere annotazioni,
-applicare preprocessing e data augmentation. Successivamente è stato fatto l'addestramento del modello sul dataset generato, 
-e la valutazione delle performance.
+Le immagini sono state prese dal dataset [Stanford Dogs](https://www.kaggle.com/datasets/jessicali9530/stanford-dogs-dataset)
+in particolare le razze: Beagle, Siberian Husky, Toy Poodle.
+Inizialmente sono state caricate su [Roboflow](https://roboflow.com/), tool per facilitare i task su progetti di computer vision.
+Alle immagini sono stati eseguiti dei processi:
+- Aggiunta manuale delle annotazioni per parte del corpo.
+- Preprocessing:
+   - Auto-orient: step per l'orientamento automatico dell'immagine
+   - Ridimensionamento in 640x640 per aumentare la velocità di training
+- Augmentation: modifiche aggiuntive alle immagini per aumentare e variare il dataset:
+  - Flip orizzontale e verticale
+  - Rotazione 90°
+  - Rotazione -15° +15*
+  - Ritaglio
+  - Hue, Saturation, Brightness 
+  - Offuscamento
+  - Rumore
+- Generate: Roboflow genera automaticamente nuove immagini con le modifiche definite prima.
+
+Questo genera una nuova versione del dataset che poi verrà usata nel training.
 
 ```mermaid
 flowchart LR
@@ -131,26 +146,86 @@ flowchart LR
     D --> A
 ```
 
-### Dataset
+### Addestramenti e considerazioni
 
-......
-......
-......
+#### Primo addestramento:
 
-### Architettura
+E' stato eseguito il training della versione 10 del dataset (./yolov5/Cerberus-10),
+che conteneva 75 immagini e nessun processo di data augmentation.<br>
+**epoche:** 50<br>
+**batch size:** 8<br>
 
-......
-......
-......
+<div align="center">
+    <img src="Object-detection/res/1_parametri.png" alt="gui" width="48%" height="48%">
+    <img src="Object-detection/res/1_loss.png" alt="gui" width="48%" height="48%">
+</div><br>
+<pre>
+  Metriche di valutazione: 
+  Validating Cerberus\training_1\weights\best.pt...
+  Model summary: 157 layers, 7018216 parameters, 0 gradients, 15.8 GFLOPs
+                   Class     Images  Instances          P          R      mAP50   mAP50-95: 100%|██████████| 1/1 [00:02<00:00,  2.16s/it]
+                     all          6         22      0.527      0.167      0.173     0.0812
+                       0          6          8      0.239       0.25      0.224      0.143
+                       1          6          8      0.342       0.25      0.216     0.0605
+</pre>                    
+Da come si vede nella valutazione i valori di Precision, Recall, mAP50, mAP50-95 risultano molto bassi, non sufficienti per 
+il funzionamento corretti del modello.
 
-### Addestramento
+#### Secondo addestramento:
 
-......
-......
-......
+Per migliorare la qualità del modello si è deciso di modificare per prima cosa il dataset, è stata generata 
+una nuova versione (./yolov5/Cerberus-12) aggiungendo 30 immagini con annotazioni e moltiplicando la dimensione
+del dataset per 3, grazie ai processi di data augmentation di roboflow, avendo così un totale di 300 immagini.<br>
+**epoche:** 50<br>
+**batch size:** 8<br>
 
-### Valutazione
+<div align="center">
+    <img src="Object-detection/res/2_parametri.png" alt="gui" width="48%" height="48%">
+    <img src="Object-detection/res/2_loss.png" alt="gui" width="48%" height="48%">
+</div><br>
+<pre>
+  Metriche di valutazione: 
+  Validating Cerberus\training_2\weights\best.pt...
+  Model summary: 157 layers, 7018216 parameters, 0 gradients, 15.8 GFLOPs
+                   Class     Images  Instances          P          R      mAP50   mAP50-95: 100%|██████████| 1/1 [00:13<00:00, 13.69s/it]
+                     all         10         33      0.524      0.481      0.476      0.201
+                       0         10         12      0.254      0.417      0.275     0.0824
+                       1         10         12       0.41      0.583      0.604       0.29
+                       2         10          9      0.909      0.444      0.549      0.232
+</pre>
+I valori sono risultati migliori di quelli precedenti.
 
-......
-......
-......
+#### Terzo addestramento: 
+
+Pur ottenendo dei valori abbastanza soddisfacenti ho notato che le training loss curves continuavano a diminuire leggermente, mentre 
+le validation loss rimanevano le stesse raggiunta epoca 30. Dalle mie ricerche questo fenomeno avrebbe potuto portare a un overfitting, così
+per provare a trovare un soluzione ho deciso di rieseguire il training diminuendo le epoche, e aumentanto il batch size per diminuire
+il tempo di training, visto che ci metteva troppo.<br>
+**epochs:** 25<br>
+**batch_size:** 12<br>
+
+<div align="center">
+    <img src="Object-detection/res/3_parametri.png" alt="gui" width="48%" height="48%">
+    <img src="Object-detection/res/3_loss.png" alt="gui" width="48%" height="48%">
+</div><br>
+<pre>
+  Metriche di valutazione: 
+  Validating Cerberus\training_3\weights\best.pt...
+  Model summary: 157 layers, 7018216 parameters, 0 gradients, 15.8 GFLOPs
+                   Class     Images  Instances          P          R      mAP50   mAP50-95: 100%|██████████| 1/1 [00:03<00:00,  3.63s/it]
+                     all         10         33      0.798      0.278      0.325      0.141
+                       0         10         12      0.544      0.333      0.266     0.0674
+                       1         10         12      0.849        0.5      0.543      0.263
+                       2         10          9          1          0      0.166      0.094
+</pre>                     
+La Precision è risultata molto migliore, ma gli altri 3 valori (R, mAP50, mAP50-95) sono diminuiti.
+Dopo qualche test manuale del modello ho deciso di mantenere l'addestramento 2 che mi pareva avere 
+risultati migliori.
+
+### Considerazioni finali
+
+Il modello ottenuto non è perfetto e genera qualche errore di localizzazione, soprattutto nel localizzare la coda,
+probabilmente dovuto al fatto che non tutte le immagini del dataset la mostravano, tuttavia la maggiorparte delle volte 
+riesce a localizzare le parti del corpo nei punti giusti. Nel caso volessi migliorarne la qualità ancora, il primo step
+sarebbe quello di aumentare il numero delle immagini del dataset con annotazioni aggiunte manulamente, e poi successivamente
+lavorare con le epoche, batch size, e iperparametri.
