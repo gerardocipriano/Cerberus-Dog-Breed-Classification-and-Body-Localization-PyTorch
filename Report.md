@@ -76,7 +76,12 @@ Il modello viene addestrato in due fasi. Nella prima fase, viene eseguito il tra
 
 Nella seconda fase, viene eseguito l’addestramento sul dataset dei gatti scongelando i pesi del modello. In questo modo, il modello può utilizzare ciò che ha imparato durante l’addestramento sulle razze dei cani anche per riconoscere le razze dei gatti.
 
-Durante l’addestramento, vengono calcolate la perdita e l’accuratezza sul set di train e sul set di validation e vengono registrate su TensorBoard per consentire un facile monitoraggio delle prestazioni del modello durante l’addestramento; Inoltre, vengono registrati su TensorBoard anche gli embeddings, il primo batch di immagini per ogni epoca e le matrici di confusione per il set di train e il set di validation.
+Durante l’addestramento, vengono calcolate la perdita e l’accuratezza sul set di train e sul set di validation e vengono registrate su TensorBoard per consentire un facile monitoraggio delle prestazioni del modello durante l’addestramento; Inoltre, vengono registrati su TensorBoard anche gli embeddings, il primo batch di immagini per ogni epoca e le matrici di confusione per il set di train e il set di validation, di seguito alcuni grafici utili su TB:
+
+<div align="center">
+    <img src="/res/class_trainmatrix.jpg" alt="trainmatrix" width="48%" height="48%">
+    <img src="/res/class_preview.jpg" alt="previews" width="48%" height="48%">
+</div><br>
 
 In ciascuna fase, è presente un contatore che consente l'early stopping in caso l'addestramento non stia migliorando significativamente col passare delle epoche in modo da evitare così l'overfitting.
 
