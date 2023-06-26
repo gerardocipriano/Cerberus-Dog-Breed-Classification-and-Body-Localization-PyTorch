@@ -58,7 +58,7 @@ Le classi sono suddivise in più file e ciascuna di queste ha un compito ben pre
 
 Il codice utilizza due dataset per addestrare il modello: il dataset Stanford Dog e il dataset Kaggle Breeds Cat. Questi due dataset sono stati scelti perché contengono un gran numero di immagini di cani e gatti di diverse razze, il che li rende adatti per addestrare un modello di classificazione delle immagini in grado di riconoscere le diverse razze di cani e gatti.
 
-Per gestire i dati di addestramento, il codice utilizza due DataLoader personalizzati. Un DataLoader è un’interfaccia fornita dalla libreria PyTorch che consente di caricare i dati in modo efficiente durante l’addestramento del modello. In questo caso, i dati vengono suddivisi in tre set: train (80%), validation (10%) e test(10%). Il set di train viene utilizzato per addestrare il modello, il set di validation viene utilizzato per valutare le prestazioni del modello durante l’addestramento e il set di test viene utilizzato per valutare le prestazioni del modello dopo l’addestramento.
+Per gestire i dati di addestramento, il codice utilizza due DataLoader personalizzati. Un DataLoader è un’interfaccia fornita dalla libreria PyTorch che consente di caricare i dati in modo efficiente durante l’addestramento del modello. In questo caso, i dati vengono suddivisi in tre set: train (80%, 136 immagini), validation (10%, 29 immagini) e test(10%, 29 immagini). Il set di train viene utilizzato per addestrare il modello, il set di validation viene utilizzato per valutare le prestazioni del modello durante l’addestramento e il set di test viene utilizzato per valutare le prestazioni del modello dopo l’addestramento. Il numero di immagini è bilanciato fra le tre classi, per cui non c'è n'è una con un numero maggiore rispetto alle altre. Ho notato che AlexNet riusciva ad addestrarsi bene anche con un numero inferiore di immagini, per cui ho eseguito l'undersampling manuale delle classi finchè non ho ottenuto lo stesso numero per tutte.
 
 Il dataset che contiene le razze dei gatti è stato volutamente sottodimensionato (20 immagini per il train, 5 per val e test) per poter sperimentare se il modello pre addestrato con le razze dei cani raggiungesse la convergenza in tempi e con risorse minori.
 
@@ -88,6 +88,13 @@ Nel complesso, il modello sembra aver raggiunto una buona precisione sia per le 
 <div align="center">
     <img src="res/class_acctrain.jpg" alt="accurancy/loss" >
 </div><br>
+
+Durante l’addestramento sulle razze di cani, ho provato a variare il numero di batch, i risultati dell'immagine precedente mostrano un addestramento su batch di 32 immagini, qui invece il grafico dell'andamento con batch di sole 4 immagini. Come si evince dal grafico il modello converge rapidamente anche con questa modifica. In tutti e due i test la convergenza viene ottenuta prima di 10 epoche, per cui considerando che ho anche l'early stopping configurato, non ho ritenuto rilevante modificare anche il numero di epoche, poichè quasi sempre il modello raggiunge in 5/6 epoche un livello accettabile di accurancy.
+
+<div align="center">
+    <img src="res/class_4batch.jpg" alt="4batchaccurancy/loss" >
+</div><br>
+
 Salvando gli embeddings durante l’addestramento delle razze di cani, è possibile visualizzare una rappresentazione bidimensionale o tridimensionale dei dati di input nel projector di TensorFlow. Gli embeddings sono vettori di numeri che rappresentano i dati in uno spazio a più dimensioni e possono essere utilizzati per visualizzare le relazioni tra i dati. Il projector di TensorFlow consente di esplorare questi embeddings e vedere come i dati sono raggruppati o separati nello spazio degli embeddings. In questo caso, si possono identificare tre grandi aree, anche se un po’ troppo ravvicinate fra loro, una per ciascuna razza.
 
 <div align="center">
@@ -96,22 +103,22 @@ Salvando gli embeddings durante l’addestramento delle razze di cani, è possib
 
 ## Rilevamento Degli Oggetti
 
-### Introduzione 
+### Introduzione
 
 L'object detection di Cerberus consiste nel localizzare all'interno di immagini di cani 3 parti del corpo:
 occhi, naso, coda. Il software mette a disposizione una interfaccia dalla quale l'utente può caricare un immagine,
-eseguire la detection e visualizzarne il risultato con le bounding boxes associate. 
+eseguire la detection e visualizzarne il risultato con le bounding boxes associate.
 Il software è contenuto nella directory Object-detection composto dai seguenti file:
 
 - create.ipynb: jupyter notebook con le istruzioni per il caricamento del dataset, allenamento
-del modello, validazione, e testing, usato durante lo sviluppo.
+  del modello, validazione, e testing, usato durante lo sviluppo.
 - main.py: entry point dell'applicazione.
 - model.py: classe che rappresenta il modello.
 - user_interface.py: definisce l'interfaccia utente e importa il modello.
-- ./Cerberus: contiene i 3 modelli addestrati in fase di progettazione. 
+- ./Cerberus: contiene i 3 modelli addestrati in fase di progettazione.
 - ./yolov5: contiente il modello yolov5 di ultralitycs.
-- ./yolov5/Cerberus-10, ./yolov5//Cerberus-12: 2 versioni del dataset usato per l'addestramento, la versione 12 è 
-la più recente. 
+- ./yolov5/Cerberus-10, ./yolov5//Cerberus-12: 2 versioni del dataset usato per l'addestramento, la versione 12 è
+la più recente.
 <div align="center">
     <img src="res/objGui.png" alt="gui" >
 </div><br>
@@ -122,16 +129,17 @@ Le immagini sono state prese dal dataset [Stanford Dogs](https://www.kaggle.com/
 in particolare le razze: Beagle, Siberian Husky, Toy Poodle.
 Inizialmente sono state caricate su [Roboflow](https://roboflow.com/), tool per facilitare i task su progetti di computer vision.
 Alle immagini sono stati eseguiti dei processi:
+
 - Aggiunta manuale delle annotazioni per parte del corpo.
 - Preprocessing:
-   - Auto-orient: step per l'orientamento automatico dell'immagine
-   - Ridimensionamento in 640x640 per aumentare la velocità di training
+  - Auto-orient: step per l'orientamento automatico dell'immagine
+  - Ridimensionamento in 640x640 per aumentare la velocità di training
 - Augmentation: modifiche aggiuntive alle immagini per aumentare e variare il dataset:
   - Flip orizzontale e verticale
   - Rotazione 90°
-  - Rotazione -15° +15*
+  - Rotazione -15° +15\*
   - Ritaglio
-  - Hue, Saturation, Brightness 
+  - Hue, Saturation, Brightness
   - Offuscamento
   - Rumore
 - Generate: Roboflow genera automaticamente nuove immagini con le modifiche definite prima.
@@ -173,7 +181,7 @@ il funzionamento corretti del modello.
 
 #### Secondo addestramento:
 
-Per migliorare la qualità del modello si è deciso di modificare per prima cosa il dataset, è stata generata 
+Per migliorare la qualità del modello si è deciso di modificare per prima cosa il dataset, è stata generata
 una nuova versione (./yolov5/Cerberus-12) aggiungendo 30 immagini con annotazioni e moltiplicando la dimensione
 del dataset per 3, grazie ai processi di data augmentation di roboflow, avendo così un totale di 300 immagini.<br>
 **epoche:** 50<br>
@@ -195,9 +203,9 @@ del dataset per 3, grazie ai processi di data augmentation di roboflow, avendo c
 </pre>
 I valori sono risultati migliori di quelli precedenti.
 
-#### Terzo addestramento: 
+#### Terzo addestramento:
 
-Pur ottenendo dei valori abbastanza soddisfacenti ho notato che le training loss curves continuavano a diminuire leggermente, mentre 
+Pur ottenendo dei valori abbastanza soddisfacenti ho notato che le training loss curves continuavano a diminuire leggermente, mentre
 le validation loss rimanevano le stesse raggiunta epoca 30. Dalle mie ricerche questo fenomeno avrebbe potuto portare a un overfitting, così
 per provare a trovare un soluzione ho deciso di rieseguire il training diminuendo le epoche, e aumentanto il batch size per diminuire
 il tempo di training, visto che ci metteva troppo.<br>
@@ -225,7 +233,13 @@ risultati migliori.
 ### Considerazioni finali
 
 Il modello ottenuto non è perfetto e genera qualche errore di localizzazione, soprattutto nel localizzare la coda,
-probabilmente dovuto al fatto che non tutte le immagini del dataset la mostravano, tuttavia la maggiorparte delle volte 
+probabilmente dovuto al fatto che non tutte le immagini del dataset la mostravano, tuttavia la maggiorparte delle volte
 riesce a localizzare le parti del corpo nei punti giusti. Nel caso volessi migliorarne la qualità ancora, il primo step
 sarebbe quello di aumentare il numero delle immagini del dataset con annotazioni aggiunte manulamente, e poi successivamente
 lavorare con le epoche, batch size, e iperparametri.
+
+Se guardiamo al lavoro svolto sia alla Classificazione che alla Localizzazione, possiamo riassumere il grafico dei vari layer utilizzati nella seguente figura:
+
+<div align="center">
+    <img src="/res/detection%20graph.jpg" alt="graph" width="48%" height="48%">
+</div>
