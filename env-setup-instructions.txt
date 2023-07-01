@@ -1,6 +1,8 @@
 SETUP ENVIRONMENT PER IL PROGETTO:
 conda env create --name <nome_environment> --file environment.yml
 conda activate <nome_environment>
+Se risultano degli errori di percorsi potrebbe essere necessario modificare il campo 'prefix' del file environment.yml 
+specificando il proprio percorso di anaconda.
 
 OBJECT DETECTION: cd ./Object-detection per eseguire il main.py
 
