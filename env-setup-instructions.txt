@@ -1,0 +1,15 @@
+SETUP ENVIRONMENT PER IL PROGETTO:
+conda env create --name <nome_environment> --file environment.yml
+conda activate <nome_environment>
+
+OBJECT DETECTION: cd ./Object-detection per eseguire il main.py
+
+-----------------------
+COMANDI UTILI:
+conda env list
+conda create --name <nome>
+conda activate <nome>
+
+conda list -e > requirements.txt
+conda create --name <nome> --file <file_req>
+conda remove --name <nome> --all
